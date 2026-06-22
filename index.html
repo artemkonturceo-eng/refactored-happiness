@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Экономический Эверест — тренажёр по мировой экономике</title>
+<style>
+:root{
+  --bg:#f2f2f7; --bg2:#ffffff;
+  --ink:#1c1c1e; --ink2:#3a3a3c; --mut:#8e8e93;
+  --blue:#007aff; --blue-press:#0063cc; --tint:rgba(0,122,255,.10);
+  --good:#34c759; --bad:#ff3b30; --warn:#ff9f0a;
+  --hair:rgba(60,60,67,.14); --fill:rgba(118,118,128,.14); --fill2:rgba(118,118,128,.22);
+  --radius:18px;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 10px 28px rgba(0,0,0,.07);
+  --shadow-h:0 4px 10px rgba(0,0,0,.08), 0 22px 48px rgba(0,0,0,.14);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0} html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,"Inter","Helvetica Neue",Arial,sans-serif;
+  color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased; line-height:1.45; letter-spacing:-.01em;
+}
+/* ambient background blobs */
+body::before,body::after{content:"";position:fixed;z-index:0;border-radius:50%;filter:blur(75px);opacity:.5;pointer-events:none}
+body::before{width:520px;height:520px;top:-180px;left:-120px;background:radial-gradient(circle at 30% 30%,#7cc5ff,transparent 70%);animation:drift1 19s var(--ease) infinite alternate}
+body::after{width:480px;height:480px;top:6%;right:-160px;background:radial-gradient(circle at 60% 40%,#cbb8ff,transparent 70%);animation:drift2 23s var(--ease) infinite alternate}
+@keyframes drift1{to{transform:translate(70px,90px) scale(1.12)}}
+@keyframes drift2{to{transform:translate(-55px,70px) scale(1.09)}}
+a{color:var(--blue);text-decoration:none}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px 90px;position:relative;z-index:1}
+/* ---- HERO ---- */
+header.hero{padding:36px 0 14px}
+.brandrow{display:flex;gap:18px;align-items:center}
+.emblem{flex:0 0 auto;width:74px;height:74px;border-radius:22px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:25px;letter-spacing:-.5px;
+  background:linear-gradient(160deg,#3aa0ff,#007aff 55%,#0057e0);box-shadow:0 8px 22px rgba(0,122,255,.4), inset 0 1px 1px rgba(255,255,255,.5);animation:pop .6s var(--spring) both}
+.kicker{font-size:12px;font-weight:600;color:var(--mut);margin-bottom:5px}
+header.hero h1{margin:0 0 7px;font-size:clamp(30px,5.2vw,46px);font-weight:700;letter-spacing:-.035em;line-height:1.02;
+  background:linear-gradient(180deg,#1c1c1e,#3a3a3c);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+header.hero p{margin:0;color:var(--mut);font-size:14.5px;max-width:720px}
+.hud{display:flex;flex-wrap:wrap;gap:4px;margin-top:20px;align-items:center;background:var(--bg2);border-radius:16px;padding:9px 12px;box-shadow:var(--shadow)}
+.chip{padding:5px 12px;font-size:13px;display:flex;gap:7px;align-items:center;border-radius:10px}
+.chip+.chip{box-shadow:inset 1px 0 0 var(--hair)}
+.chip b{color:var(--ink);font-weight:600} .chip .lbl{color:var(--mut);font-size:12px}
+#hud-xp{display:inline-block;transition:transform .35s var(--spring)}
+.hud.bump #hud-xp{transform:scale(1.4)}
+.lvlbar{flex:1;min-width:130px;height:8px;margin:0 8px;background:var(--fill);border-radius:99px;overflow:hidden}
+.lvlbar>i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#34c759,#007aff);transition:width .7s var(--spring)}
+#resetBtn{margin-left:auto;border:none;background:var(--fill);color:var(--ink);cursor:pointer;font-size:15px;width:34px;height:34px;border-radius:50%;transition:transform .15s var(--spring),background .2s}
+#resetBtn:hover{background:var(--fill2)} #resetBtn:active{transform:scale(.9)}
+/* ---- NAV (segmented control) ---- */
+nav.tabs{position:sticky;top:10px;z-index:20;display:flex;margin:18px 0 22px;padding:4px;border-radius:14px;
+  background:rgba(242,242,247,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);box-shadow:0 1px 0 var(--hair),var(--shadow)}
+.seg-ind{position:absolute;border-radius:10px;background:var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.16);z-index:1;
+  transition:left .42s var(--spring),top .3s var(--ease),width .42s var(--spring),height .3s var(--ease)}
+.tab{position:relative;z-index:2;flex:1;text-align:center;cursor:pointer;padding:9px 8px;font-size:13px;font-weight:500;color:var(--ink);user-select:none;border-radius:10px;transition:color .25s,transform .15s var(--spring)}
+.tab:active{transform:scale(.96)}
+.tab.active{font-weight:600;color:var(--blue)}
+section.view{display:none} section.view.active{display:block;animation:viewIn .45s var(--ease)}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+/* ---- GENERIC ---- */
+.card{background:var(--bg2);border:none;border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 12px;font-size:17px;font-weight:700;letter-spacing:-.02em}
+.muted{color:var(--mut)} .small{font-size:13px}
+.grid{display:grid;gap:12px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+input[type=text],input[type=number],select{background:var(--bg2);border:1px solid var(--hair);color:var(--ink);
+  padding:10px 14px;font-size:14px;outline:none;border-radius:12px;font-family:inherit;transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.15)}
+.btn{cursor:pointer;border:none;background:var(--fill);color:var(--blue);padding:9px 16px;border-radius:12px;font-weight:600;font-size:13px;font-family:inherit;transition:transform .15s var(--spring),background .2s,filter .2s}
+.btn:hover{background:var(--fill2)} .btn:active{transform:scale(.95)}
+.btn.acc{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(0,122,255,.35)} .btn.acc:hover{filter:brightness(1.08)}
+/* ---- TICKETS ---- */
+.tk{border:none;border-radius:16px;margin-bottom:10px;background:var(--bg2);box-shadow:var(--shadow);overflow:hidden;
+  animation:rise .5s var(--ease) both;transition:transform .3s var(--spring),box-shadow .3s var(--ease)}
+.tk:hover{transform:translateY(-3px);box-shadow:var(--shadow-h)}
+.tk>.head{display:flex;align-items:center;gap:14px;padding:15px 18px;cursor:pointer}
+.tk .no{font-weight:600;font-size:12.5px;min-width:72px;color:#fff;padding:7px 8px;text-align:center;border-radius:10px;
+  background:linear-gradient(160deg,#3aa0ff,#007aff);box-shadow:0 3px 8px rgba(0,122,255,.3)}
+.tk .topics{flex:1;font-size:14.5px;color:var(--ink);font-weight:600} .tk .topics .t3{color:var(--mut);font-weight:400}
+.tk .tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.tag.calc{color:#fff;background:linear-gradient(160deg,#ffb340,#ff9f0a)}
+.tag.ana{color:var(--blue);background:var(--tint)}
+.tk .chev{color:var(--mut);transition:transform .35s var(--spring)}
+.tk.open .chev{transform:rotate(180deg)}
+.tk .body{display:none;padding:2px 18px 18px;border-top:1px solid var(--hair)}
+.tk.open .body{display:block;animation:fade .3s}
+.qa{margin:12px 0;padding:14px 16px;border-radius:14px;background:var(--bg)}
+.qa .q{font-weight:600;margin-bottom:6px}
+.qa .num{display:inline-block;font-size:12px;color:#fff;background:var(--blue);padding:1px 9px;margin-right:8px;font-weight:600;border-radius:99px;vertical-align:middle}
+.qa .ans{color:var(--ink2);font-size:14px;line-height:1.62;display:none;margin-top:10px;border-top:1px solid var(--hair);padding-top:10px}
+.qa.show .ans{display:block;animation:rise .35s var(--ease)}
+.qa ul{margin:6px 0 6px 2px;padding-left:18px} .qa li{margin:4px 0}
+.qa b{color:var(--ink)}
+.reveal{cursor:pointer;font-size:13px;font-weight:600;color:var(--blue);user-select:none}
+.reveal:hover{opacity:.65}
+.solbox{background:rgba(255,159,10,.1)!important}
+.kbd{font-family:ui-monospace,Menlo,monospace;background:var(--fill);border-radius:6px;padding:1px 7px;font-size:13px;color:var(--blue)}
+/* ---- CALCULATORS ---- */
+.calc-tabs{display:flex;margin-bottom:18px;padding:4px;border-radius:12px;background:var(--fill)}
+.calc-tab{cursor:pointer;flex:1;text-align:center;padding:9px 10px;font-size:13px;font-weight:600;color:var(--ink);border-radius:9px;transition:.25s}
+.calc-tab.active{background:var(--bg2);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.calc-panel{display:none} .calc-panel.active{display:block;animation:viewIn .4s var(--ease)}
+.calc-panel h3{margin-top:0;font-size:18px;font-weight:700;letter-spacing:-.02em}
+table.t{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;margin:10px 0;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--hair)}
+table.t th,table.t td{padding:9px 10px;text-align:center;border-bottom:1px solid var(--hair)}
+table.t tr:last-child td{border-bottom:none}
+table.t th{background:var(--fill);color:var(--mut);font-weight:600;font-size:12px}
+table.t td input{width:78px;text-align:center;padding:7px 8px}
+.result{font-size:15px;line-height:1.7;margin-top:14px;padding:14px 18px;border-radius:14px;background:var(--tint)}
+.result b{color:var(--blue)}
+.verdict.good{color:var(--good);font-weight:600} .verdict.bad{color:var(--bad);font-weight:600}
+/* ---- FLASHCARDS ---- */
+.fc{perspective:1400px;max-width:560px;margin:0 auto}
+.fc-inner{position:relative;width:100%;min-height:230px;transition:transform .6s var(--ease);transform-style:preserve-3d;cursor:pointer}
+.fc.flip .fc-inner{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;padding:26px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:var(--bg2);box-shadow:var(--shadow)}
+.fc-face.back{transform:rotateY(180deg);background:linear-gradient(160deg,#fff,#eef4ff);text-align:left;justify-content:flex-start;overflow:auto}
+.fc-face .qt{font-size:21px;font-weight:700;letter-spacing:-.02em} .fc-face .hint{color:var(--mut);font-size:12px;margin-top:16px}
+.fc-controls{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+/* ---- PROGRESS ---- */
+.ach{display:flex;gap:13px;align-items:center;padding:12px 14px;border-radius:14px;margin-bottom:8px;background:var(--bg2);box-shadow:var(--shadow);transition:transform .25s var(--spring)}
+.ach:hover{transform:translateX(3px)}
+.ach.locked{opacity:.5;box-shadow:none;background:var(--fill)} .ach .ico{font-size:23px;width:30px;text-align:center} .ach .txt b{display:block;font-size:14px;font-weight:600} .ach .txt span{font-size:12.5px;color:var(--mut)}
+.foot{color:var(--mut);font-size:12.5px;margin-top:30px;line-height:1.6;border-top:1px solid var(--hair);padding-top:16px}
+.note{font-size:12px;color:var(--warn);background:rgba(255,159,10,.12);border-radius:8px;padding:6px 10px;display:inline-block}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px) scale(.9);background:rgba(40,40,45,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:#fff;font-weight:600;padding:13px 22px;border-radius:16px;font-size:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);opacity:0;transition:.4s var(--spring);z-index:99}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+/* ===== DARK THEME ===== */
+:root[data-theme="dark"]{
+  --bg:#000000; --bg2:#1c1c1e;
+  --ink:#f5f5f7; --ink2:#c7c7cc; --mut:#8e8e93;
+  --blue:#0a84ff; --blue-press:#0a84ff; --tint:rgba(10,132,255,.22);
+  --good:#30d158; --bad:#ff453a; --warn:#ff9f0a;
+  --hair:rgba(255,255,255,.14); --fill:rgba(120,120,128,.28); --fill2:rgba(120,120,128,.46);
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 12px 30px rgba(0,0,0,.55);
+  --shadow-h:0 4px 12px rgba(0,0,0,.55), 0 24px 50px rgba(0,0,0,.65);
+}
+:root[data-theme="dark"] body::before{opacity:.34;background:radial-gradient(circle at 30% 30%,#1e4f8f,transparent 70%)}
+:root[data-theme="dark"] body::after{opacity:.3;background:radial-gradient(circle at 60% 40%,#4a2f7a,transparent 70%)}
+:root[data-theme="dark"] header.hero h1{background:linear-gradient(180deg,#fff,#c7c7cc);-webkit-background-clip:text;background-clip:text}
+:root[data-theme="dark"] nav.tabs{background:rgba(28,28,30,.72)}
+:root[data-theme="dark"] .tag.ana{color:#7ab7ff}
+:root[data-theme="dark"] .fc-face.back{background:linear-gradient(160deg,#1c1c1e,#16263f)}
+:root[data-theme="dark"] .toast{background:rgba(240,240,245,.95);color:#1c1c1e}
+/* smooth theme cross-fade */
+html.theme-anim *{transition:background-color .45s ease,color .4s ease,border-color .45s ease,box-shadow .45s ease !important}
+.tbtn{border:none;background:var(--fill);color:var(--ink);cursor:pointer;font-size:15px;width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:transform .35s var(--spring),background .2s}
+.tbtn:hover{background:var(--fill2)} .tbtn:active{transform:scale(.88) rotate(25deg)}
+.hud #resetBtn{margin-left:6px}
+.wrap{animation:viewIn .55s var(--ease)}
+/* ===== AI CONSULTANT (iMessage-style) ===== */
+.persona{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.chat{display:flex;flex-direction:column;height:min(60vh,540px)}
+.chat-scroll{flex:1;overflow-y:auto;padding:4px 2px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth}
+.msg{max-width:86%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.55;animation:rise .35s var(--ease);overflow-wrap:break-word}
+.msg.bot{align-self:flex-start;background:var(--fill);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:5px;box-shadow:0 4px 12px rgba(0,122,255,.3)}
+.msg.me b{color:#fff}
+.msg b{font-weight:600} .msg ul{margin:6px 0;padding-left:18px} .msg li{margin:3px 0}
+.msg .src{display:block;margin-top:8px;font-size:11px;color:var(--mut)}
+.typing{display:inline-flex!important;gap:5px;padding:14px 16px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s} .typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:11px 0 2px}
+.chip-s{cursor:pointer;font-size:12.5px;padding:7px 13px;border-radius:99px;background:var(--fill);color:var(--blue);font-weight:600;transition:transform .15s var(--spring),background .2s}
+.chip-s:hover{background:var(--fill2)} .chip-s:active{transform:scale(.94)}
+.chat-input{display:flex;gap:8px;margin-top:12px} .chat-input input{flex:1}
+/* ===== MODAL / EXAM ===== */
+.modal-bk{position:fixed;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s var(--ease);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.modal-bk.show{opacity:1;pointer-events:auto}
+.sheet{width:100%;max-width:680px;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:20px;transform:translateY(60px);transition:transform .45s var(--spring);box-shadow:0 -10px 60px rgba(0,0,0,.35)}
+@media(min-width:680px){.modal-bk{align-items:center}.sheet{border-radius:24px}}
+.modal-bk.show .sheet{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.sheet-head h3{margin:0;font-size:20px;font-weight:700;letter-spacing:-.02em;flex:1}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:17px;padding:5px 12px;border-radius:10px;background:var(--fill);color:var(--ink);transition:background .3s,color .3s}
+.timer.warn{background:rgba(255,159,10,.2);color:var(--warn)} .timer.danger{background:rgba(255,59,48,.2);color:var(--bad)}
+.xclose{border:none;background:var(--fill);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;color:var(--ink);transition:transform .15s var(--spring)}
+.xclose:active{transform:scale(.9)}
+.fab{position:fixed;right:22px;bottom:22px;z-index:40;border:none;cursor:pointer;border-radius:18px;padding:14px 18px;font-weight:600;font-size:14px;font-family:inherit;color:#fff;background:linear-gradient(160deg,#3aa0ff,#007aff);box-shadow:0 10px 30px rgba(0,122,255,.45);transition:transform .2s var(--spring),box-shadow .2s;animation:pop .6s var(--spring) both}
+.fab:hover{transform:translateY(-3px) scale(1.04)} .fab:active{transform:scale(.94)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.cft{position:absolute;width:9px;height:14px;top:-22px;border-radius:2px;will-change:transform;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}body::before,body::after{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="brandrow">
+      <div class="emblem">МЭ</div>
+      <div>
+        <div class="kicker">Финансовый университет · 38.03.01 «Экономика» · БАНиА</div>
+        <h1>Экономический Эверест</h1>
+        <p>Тренажёр по дисциплине «Мировая экономика и международные экономические отношения». 25 экзаменационных билетов, калькуляторы задач, шпаргалка и флэш-карты. Устный экзамен: 3 вопроса × 20 = 60 баллов.</p>
+      </div>
+    </div>
+    <div class="hud">
+      <div class="chip"><span class="lbl">Звание</span><b id="hud-rank">Экономический эмигрант</b></div>
+      <div class="chip"><span class="lbl">Уровень</span><b id="hud-lvl">1</b></div>
+      <div class="chip"><span class="lbl">XP</span><b id="hud-xp">0</b></div>
+      <div class="lvlbar"><i id="hud-bar"></i></div>
+      <button class="tbtn" id="themeBtn" title="Переключить тему">🌙</button>
+      <button id="resetBtn" title="Сбросить прогресс">↺</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <div class="seg-ind" id="segInd"></div>
+    <div class="tab active" data-v="tickets">Билеты</div>
+    <div class="tab" data-v="calc">Калькуляторы</div>
+    <div class="tab" data-v="cheat">Шпаргалка</div>
+    <div class="tab" data-v="cards">Карточки</div>
+    <div class="tab" data-v="consult">Консультант</div>
+    <div class="tab" data-v="progress">Прогресс</div>
+  </nav>
+
+  <!-- TICKETS -->
+  <section class="view active" id="view-tickets">
+    <div class="toolbar">
+      <input type="text" id="search" placeholder="Поиск по темам: ТНК, валюта, ВТО, интеграция…" style="flex:1;min-width:220px">
+      <button class="btn" id="expandAll">Развернуть всё</button>
+      <button class="btn" id="collapseAll">Свернуть всё</button>
+    </div>
+    <div id="ticketList"></div>
+  </section>
+
+  <!-- CALCULATORS -->
+  <section class="view" id="view-calc">
+    <div class="card">
+      <div class="calc-tabs">
+        <div class="calc-tab active" data-c="tot">Условия торговли · Б22</div>
+        <div class="calc-tab" data-c="be">Безубыточный курс · Б23–24</div>
+        <div class="calc-tab" data-c="imp">Импортная прибыль · Б25</div>
+      </div>
+
+      <div class="calc-panel active" id="calc-tot">
+        <h3>Индекс условий торговли (Terms of Trade)</h3>
+        <p class="muted small">ToT = (средневзвешенный индекс цен экспорта ÷ средневзвешенный индекс цен импорта) × 100. Веса — доли товаров. ToT &gt; 100 — условия улучшились.</p>
+        <table class="t"><thead><tr><th>Экспорт</th><th>Доля xⱼ, %</th><th>Индекс цен pⱼ, %</th></tr></thead><tbody id="tot-exp"></tbody></table>
+        <table class="t"><thead><tr><th>Импорт</th><th>Доля mⱼ, %</th><th>Индекс цен pⱼ, %</th></tr></thead><tbody id="tot-imp"></tbody></table>
+        <div class="result" id="tot-res"></div>
+      </div>
+
+      <div class="calc-panel" id="calc-be">
+        <h3>Безубыточный валютный курс экспортёра</h3>
+        <p class="muted small">Безубыточность: выручка в рублях = себестоимость. Выручка = Цена(валюта) × Курс. Отсюда <span class="kbd">Курс* = Себестоимость ÷ Цена</span>.</p>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+          <label class="small muted">Себестоимость единицы, руб<br><input type="number" id="be-cost" value="7225"></label>
+          <label class="small muted">Цена реализации, в валюте<br><input type="number" id="be-price" value="84"></label>
+          <label class="small muted">Валюта<br><input type="text" id="be-cur" value="USD" style="width:90px"></label>
+        </div>
+        <div style="margin-top:10px">
+          <button class="btn" onclick="bePreset(7225,84,'USD')">Б23 · IGGC</button>
+          <button class="btn" onclick="bePreset(138680,1500,'USD')">Б24 · Nmetal</button>
+        </div>
+        <div class="result" id="be-res"></div>
+      </div>
+
+      <div class="calc-panel" id="calc-imp">
+        <h3>Минимальный объём импорта для заданной прибыли</h3>
+        <p class="muted small">Себестоимость ед. = (Цена + Доставка) в валюте × Курс. Маржа = (Цена продажи − Себестоимость) ÷ Себестоимость. Ищем наименьший объём, где маржа ≥ цели.</p>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+          <label class="small muted">Цена закупки, EUR<br><input type="number" id="imp-base" value="20"></label>
+          <label class="small muted">Цена продажи, руб<br><input type="number" id="imp-sell" value="2200"></label>
+          <label class="small muted">Курс EUR/RUB<br><input type="number" id="imp-rate" value="89.301" step="0.001"></label>
+          <label class="small muted">Целевая маржа, %<br><input type="number" id="imp-goal" value="10"></label>
+        </div>
+        <table class="t"><thead><tr><th>Объём, шт</th><th>Доставка, EUR/шт</th><th>Себест-ть, руб</th><th>Маржа</th><th>Цель?</th></tr></thead><tbody id="imp-rows"></tbody></table>
+        <div class="result" id="imp-res"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHEAT SHEET -->
+  <section class="view" id="view-cheat">
+    <div class="toolbar"><input type="text" id="cheatSearch" placeholder="Поиск по шпаргалке" style="flex:1;min-width:220px"></div>
+    <div id="cheatList" class="grid"></div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section class="view" id="view-cards">
+    <div class="card" style="text-align:center">
+      <div class="muted small" id="fc-counter" style="margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em"></div>
+      <div class="fc" id="fc"><div class="fc-inner">
+        <div class="fc-face front"><div class="qt" id="fc-q"></div><div class="hint">нажми, чтобы перевернуть · пробел</div></div>
+        <div class="fc-face back"><div id="fc-a"></div></div>
+      </div></div>
+      <div class="fc-controls">
+        <button class="btn" id="fc-again">↺ Ещё раз</button>
+        <button class="btn acc" id="fc-know">✓ Знаю (+20 XP)</button>
+        <button class="btn" id="fc-next">→ Дальше</button>
+        <button class="btn" id="fc-shuffle">🔀 Перемешать</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSULTANT -->
+  <section class="view" id="view-consult">
+    <div class="card">
+      <div class="persona">
+        <span class="small muted">Собеседник:</span>
+        <select id="persona">
+          <option value="neutral">🎓 Нейтральный эксперт</option>
+          <option value="keynes">🏛️ Кейнс</option>
+          <option value="friedman">📈 Фридман</option>
+          <option value="coach">💪 Мотиватор</option>
+        </select>
+        <button class="tbtn" id="apiBtn" title="Подключить свой ИИ" style="margin-left:auto">⚙︎</button>
+      </div>
+      <div id="apiBox" class="small" style="display:none;margin-bottom:14px">
+        <div class="muted" style="margin-bottom:8px">Необязательно: подключи свой OpenAI-совместимый API-ключ для «живого» ИИ (с использованием материалов курса как контекста). Без ключа Эконом-бот работает офлайн. Ключ хранится только в этом браузере.</div>
+        <div class="grid" style="grid-template-columns:1fr">
+          <input type="text" id="apiKey" placeholder="API-ключ (sk-…)">
+          <input type="text" id="apiModel" placeholder="Модель (по умолч. gpt-4o-mini)">
+          <input type="text" id="apiBase" placeholder="Base URL (по умолч. https://api.openai.com/v1)">
+        </div>
+        <button class="btn" id="apiSave" style="margin-top:8px">Сохранить</button>
+        <span id="apiState" class="muted"></span>
+      </div>
+      <div class="chat">
+        <div class="chat-scroll" id="chatScroll"></div>
+        <div class="chips" id="chatChips"></div>
+        <div class="chat-input">
+          <input type="text" id="chatInput" placeholder="Спроси про тему: ТНК, ЕАЭС, условия торговли…">
+          <button class="btn acc" id="chatSend">Спросить</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section class="view" id="view-progress">
+    <div class="card">
+      <h3>Лестница к вершине</h3>
+      <div id="ladder" class="grid"></div>
+    </div>
+    <div class="card">
+      <h3>Достижения</h3>
+      <div id="achList"></div>
+    </div>
+  </section>
+
+  <div class="foot">
+    Сделано на $0 · работает офлайн · прогресс хранится в этом браузере (localStorage).<br>
+    Расчёты в калькуляторах перепроверены; ответы — опорные конспекты, сверяйте с лекциями и учебником.
+  </div>
+</div>
+<button class="fab" id="examFab">🎲 Режим экзамена</button>
+<div class="modal-bk" id="examBk">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3 id="examTitle">Билет</h3>
+      <div class="timer" id="examTimer">20:00</div>
+      <button class="xclose" id="examClose">✕</button>
+    </div>
+    <p class="small muted" style="margin:0 0 10px">Отвечай вслух на все 3 вопроса, затем сверься. 20 минут — как на реальном экзамене.</p>
+    <div id="examBody"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
+      <button class="btn acc" id="examReveal">Показать ответы</button>
+      <button class="btn" id="examNext">🎲 Другой билет</button>
+      <button class="btn" id="examDone">Готово · +60 XP</button>
+    </div>
+  </div>
+</div>
+<div id="confetti"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ DATA: 25 ticket answers ============ */
+const TICKETS=[
+{n:1,q:[
+ {t:"theory",q:"Понятие мирового хозяйства и этапы его развития",a:"<b>Мировое хозяйство</b> — совокупность национальных экономик и негосударственных субъектов, связанных международным разделением труда (МРТ) и системой МЭО в единый целостный организм.<ul><li><b>Признаки:</b> целостность, иерархичность, многоуровневость, общая инфраструктура (транспорт, финансы, ИКТ).</li><li><b>Этапы:</b> 1) зарождение (XV–XVII вв., Великие геогр. открытия, мировой рынок); 2) формирование (XVIII–XIX вв., промышленный переворот, колонии); 3) рубеж XIX–XX вв. — сложилось целостное МХ; 4) 1914–1945 — кризис, дезинтеграция; 5) 1945–1970-е — Бреттон-Вудс, деколонизация, ТНК; 6) с 1980–90-х — глобализация, либерализация, цифровизация.</li></ul>"},
+ {t:"theory",q:"Человеческие ресурсы мирового хозяйства и международная миграция рабочей силы",a:"<ul><li><b>Трудовые ресурсы</b> — трудоспособное население + экономически активное население (рабочая сила, ~3,5 млрд занятых). Показатели: численность, доля ЭАН, безработица, качество (образование, здоровье).</li><li><b>Международная миграция рабочей силы</b> — перемещение трудоспособных через границы. Виды: трудовая, постоянная/временная, легальная/нелегальная, «утечка мозгов».</li><li><b>Причины:</b> экономические (разница в оплате, безработица) и неэкономические.</li><li><b>Центры притяжения:</b> США, ЕС (Германия), страны Персидского залива, Россия.</li><li><b>Последствия:</b> у принимающих — рабочая сила, но нагрузка на соцсферу; у отдающих — снижение безработицы, денежные переводы (remittances), но утечка мозгов.</li></ul>"},
+ {t:"analysis",q:"Свидетельствует ли выход на международные рынки о конкурентоспособности? Какие преимущества (кроме инвестресурсов) даёт интеграция в мировое хозяйство?",a:"<b>Тезис:</b> сам факт выхода и продаж ещё не доказывает устойчивую конкурентоспособность (это могло быть из-за низкой цены/сырья/курса). Конкурентоспособность — это <i>устойчивое</i> преимущество.<br><b>Кроме инвестресурсов интеграция даёт:</b><ul><li>доступ к технологиям и трансфер знаний/менеджмента;</li><li>эффект масштаба (расширение рынков сбыта);</li><li>доступ к дешёвым ресурсам и комплектующим;</li><li>диверсификация рисков по странам;</li><li>участие в глобальных цепочках стоимости (GVC), рост бренда и репутации.</li></ul>"}
+]},
+{n:2,q:[
+ {t:"theory",q:"Глобализация: сущность, причины, последствия для стран с разным уровнем развития",a:"<b>Сущность</b> — усиление взаимозависимости национальных экономик, формирование единого мирового рынка товаров, услуг, капитала, технологий, рабочей силы.<br><b>Причины:</b> НТП (ИКТ, транспорт), либерализация торговли и движения капитала, деятельность ТНК, унификация институтов (ВТО, МВФ).<br><b>Последствия:</b> для <b>развитых</b> — расширение рынков, рост эффективности, вынос производств; для <b>развивающихся</b> — приток инвестиций/технологий, но зависимость и уязвимость к кризисам. Общий минус — рост неравенства и финансовая нестабильность."},
+ {t:"theory",q:"Классификация государств в мировой экономике и её критерии",a:"<ul><li><b>Всемирный банк</b> — по ВНД на душу: страны с низким, ниже среднего, выше среднего и высоким доходом.</li><li><b>МВФ</b> — развитые / с формирующимся рынком и развивающиеся.</li><li><b>ООН</b> — по ИЧР (HDI) + группа наименее развитых стран (НРС).</li></ul><b>Критерии:</b> ВВП/ВНД на душу, структура экономики, HDI, уровень индустриализации, доля в мировой торговле."},
+ {t:"analysis",q:"Как ситуация в мировой политике и положение в регионах влияют на выбор форм и методов МЭО?",a:"Экономика и политика взаимосвязаны: политические отношения определяют доступность форм МЭО.<ul><li><b>Санкции/эмбарго</b> закрывают торговлю и финансирование → переход на бартер, параллельный импорт, расчёты в нацвалютах.</li><li><b>Союзнические отношения</b> → льготные режимы, интеграция (ЕАЭС, ЗСТ).</li><li><b>Региональная нестабильность</b> повышает страновой риск → удорожание капитала, страхование, уход инвесторов.</li><li>Вывод: выбор форм (торговля vs ПИИ vs кооперация) и методов (валюта расчётов, логистика) — производная от политического климата.</li></ul>"}
+]},
+{n:3,q:[
+ {t:"theory",q:"Развитые страны в мировой экономике. Критерии отнесения",a:"<ul><li>высокий ВНД на душу (Всемирный банк — группа high income);</li><li>постиндустриальная структура (доминируют услуги и высокотехнологичная промышленность);</li><li>высокий ИЧР, зрелые рыночные институты, членство в ОЭСР;</li><li>высокая производительность труда; ведущая роль в мировой торговле, финансах и технологиях.</li></ul>~30–40 стран, &lt;16% населения, но &gt;50% мирового ВВП (G7, ЕС, Япония и др.)."},
+ {t:"theory",q:"Внешнеторговая политика, её разновидности и их соотношение",a:"Два полюса: <b>протекционизм</b> (защита нацрынка) и <b>свободная торговля / фритредерство</b> (либерализация). Между ними — умеренная и селективная политика.<br><b>Инструменты:</b> тарифные (пошлины) и нетарифные (квоты, лицензии, стандарты, субсидии).<br><b>Современность:</b> сочетание — либерализация в рамках ВТО + избирательный неопротекционизм (защита отраслей, санкции)."},
+ {t:"analysis",q:"Глобализация и рост слияний/поглощений: случайность или закономерность? Роль фрагментации",a:"Воздействие <b>обоюдное</b>: глобализация порождает M&amp;A, а M&amp;A углубляют глобализацию.<ul><li>Рост M&amp;A — закономерность: погоня за эффектом масштаба, доступом к рынкам, технологиям и ресурсам в открытой экономике.</li><li><b>Фрагментация</b> производства (вынос звеньев в разные страны, GVC) усиливает потребность объединять активы в разных юрисдикциях → новые волны сделок.</li><li>Итог: M&amp;A — закономерный механизм концентрации капитала в условиях глобализации, а не случайность.</li></ul>"}
+]},
+{n:4,q:[
+ {t:"theory",q:"Глобализация мирового хозяйства: сущность, причины, положительные и отрицательные стороны",a:"<b>Сущность и причины</b> — см. билет 2.<br><b>Плюсы:</b> рост эффективности по сравнительным преимуществам, диффузия технологий, расширение рынков, снижение цен, доступ к капиталу.<br><b>Минусы:</b> рост неравенства между и внутри стран, финансовая нестабильность и быстрое распространение кризисов, потеря части экономического суверенитета, экологические издержки, уязвимость периферии."},
+ {t:"theory",q:"Природные ресурсы и их роль в мировой экономике",a:"<b>Природные ресурсы</b> — естественные блага, используемые в производстве. Виды: минеральные, земельные, водные, лесные, агроклиматические, рекреационные; по исчерпаемости — исчерпаемые (возобновимые/невозобновимые) и неисчерпаемые.<br><b>Роль:</b> сырьевая база, фактор размещения производств, источник экспортных доходов, геополитический рычаг. Распределены неравномерно → торговля сырьём, зависимость, «ресурсное проклятие». Обеспеченность = запасы ÷ годовая добыча."},
+ {t:"analysis",q:"Возможности и риски вступления России в ВТО (2012) в условиях современных санкций",a:"<b>Возможности:</b> недискриминационный доступ на рынки (РНБ), участие в выработке правил, защита прав экспортёров, приток инвестиций и технологий.<br><b>Риски/минусы:</b> обострение конкуренции с импортом на внутреннем рынке, давление на слабые отрасли.<br><b>В условиях санкций:</b> часть выгод ВТО нейтрализована (партнёры нарушают принципы РНБ), но членство сохраняет правовую площадку для споров; акцент смещается на ЕАЭС, переориентацию на дружественные рынки, импортозамещение."}
+]},
+{n:5,q:[
+ {t:"theory",q:"Международная торговля услугами: сущность, особенности, классификация, лидеры, значение ГАТС",a:"<b>Услуги</b> — «невидимый» экспорт. Особенности: неосязаемость, несохраняемость, одновременность производства и потребления, часто неотделимость от источника.<br><b>4 способа поставки по ГАТС:</b> 1) трансграничная поставка; 2) потребление за рубежом; 3) коммерческое присутствие; 4) перемещение физлиц.<br><b>Виды:</b> транспорт, туризм, финансовые, ИКТ, деловые.<br><b>Лидеры экспорта:</b> США, Великобритания, Германия, Китай; импортёры — США, Китай, Германия.<br><b>ГАТС (GATS)</b> — соглашение ВТО по торговле услугами; принципы РНБ и национального режима."},
+ {t:"theory",q:"Тарифные методы и нетарифные ограничения в международной торговле",a:"<b>Тарифные</b> — таможенные пошлины (импортные/экспортные; адвалорные, специфические, комбинированные).<br><b>Нетарифные:</b> количественные (квоты, лицензии, «добровольные» ограничения экспорта), скрытые (техн. и санитарные стандарты, госзакупки, бюрократия), финансовые (субсидии, демпинг, экспортное кредитование). Сегодня нетарифные барьеры доминируют."},
+ {t:"analysis",q:"Какими индикаторами измеряется экономический эффект труда иностранной рабочей силы?",a:"<ul><li>вклад мигрантов в ВВП и в отдельные отрасли (стройка, с/х, услуги);</li><li>заполнение дефицитных и непрестижных рабочих мест, влияние на уровень зарплат;</li><li>фискальный баланс: налоги/взносы мигрантов минус расходы на соцсферу;</li><li><b>денежные переводы</b> (remittances) — для стран-доноров крупная статья платёжного баланса;</li><li>демографический эффект, нагрузка на инфраструктуру, влияние на производительность.</li></ul>"}
+]},
+{n:6,q:[
+ {t:"theory",q:"Международный вывоз капитала: причины, формы и динамика",a:"<b>Вывоз капитала</b> — изъятие части капитала из нацоборота и размещение за рубежом.<br><b>Причины:</b> относительный избыток капитала, разница в норме прибыли, доступ к рынкам/ресурсам, обход барьеров, диверсификация.<br><b>Формы:</b> по источнику — частный, государственный, международных организаций; по сроку — кратко-/долгосрочный; по цели — предпринимательский (ПИИ ≥10%, портфельные) и ссудный (кредиты, займы, депозиты).<br><b>Динамика:</b> рост, доминирование ТНК; развитые страны — крупнейшие и экспортёры, и импортёры капитала."},
+ {t:"theory",q:"Международные экономические отношения и их формы",a:"<b>МЭО</b> — система хозяйственных связей между субъектами разных стран.<br><b>Формы:</b> 1) международная торговля товарами и услугами; 2) международное движение капитала; 3) международная миграция рабочей силы; 4) валютно-финансовые и кредитные отношения; 5) международная экономическая интеграция; 6) международный обмен технологиями и научно-техническое сотрудничество."},
+ {t:"analysis",q:"Имущественная обособленность юрлица и баланс прав акционеров владеть/пользоваться/распоряжаться долей",a:"<b>Имущественная обособленность</b> означает: имущество компании отделено от имущества акционеров; собственник доли владеет <i>акцией</i>, а не активами фирмы напрямую.<ul><li>Акционер вправе распоряжаться своей долей (продать, заложить, в т.ч. конкуренту), но не имуществом компании.</li><li>Баланс интересов обеспечивают корпоративное право и устав: преимущественное право выкупа, ограничения на отчуждение, защита миноритариев.</li><li>Конфликт «свобода распоряжения долей ↔ интересы компании» решается через корпоративные процедуры и раскрытие информации.</li></ul>"}
+]},
+{n:7,q:[
+ {t:"theory",q:"Сущность и формы международной экономической интеграции",a:"<b>МЭИ</b> — хозяйственно-политическое объединение стран на основе углубления устойчивых взаимосвязей и МРТ.<br><b>Формы (стадии по Балассе):</b> 1) зона свободной торговли (отмена пошлин внутри); 2) таможенный союз (+ единый внешний тариф); 3) общий рынок (+ свобода движения факторов); 4) экономический и валютный союз (+ единая политика и валюта); 5) полная интеграция.<br><b>Примеры:</b> ЕС, ЕАЭС, USMCA, МЕРКОСУР, АСЕАН."},
+ {t:"theory",q:"Ресурсная база мирового хозяйства. Принципы классификации природных ресурсов",a:"<b>Классификация:</b> по происхождению (минеральные, водные, земельные, биологические, климатические); по исчерпаемости (исчерпаемые возобновимые/невозобновимые, неисчерпаемые); по назначению (топливно-энергетические, металлические, неметаллические).<br>Распределены неравномерно → основа МРТ и торговли сырьём. Обеспеченность = запасы ÷ добыча; учитывают также экономическую доступность ресурсов."},
+ {t:"analysis",q:"Особенности внутренней конкуренции в холдинговой модели бизнеса",a:"Холдинг даёт эффект масштаба, но внутри возможна конкуренция между дочерними структурами.<ul><li><b>Плюсы внутренней конкуренции:</b> рост эффективности, бенчмаркинг подразделений, стимул к инновациям.</li><li><b>Минусы:</b> дублирование, «каннибализация» продуктов, конфликт за ресурсы и трансфертные цены.</li><li>Управляется через распределение рынков/функций, систему KPI и трансфертное ценообразование; материнская компания балансирует конкуренцию и кооперацию.</li></ul>"}
+]},
+{n:8,q:[
+ {t:"theory",q:"Общая характеристика и классификация международных экономических организаций",a:"<b>Классификация:</b> по составу — универсальные/региональные; по сфере — торговые (ВТО), валютно-финансовые (МВФ, Всемирный банк), отраслевые (ОПЕК), интеграционные (ЕС, ЕАЭС); по статусу — межгосударственные (МПО) и неправительственные (НПО); внутри системы ООН и вне её.<br><b>Функции:</b> регулирующая, координационная, информационно-аналитическая, кредитная."},
+ {t:"theory",q:"Последствия вывоза и ввоза капитала для стран-экспортёров и импортёров",a:"<b>Для экспортёра капитала:</b> + доходы от инвестиций, рынки сбыта, влияние; − отток ресурсов, сокращение внутренних инвестиций и рабочих мест.<br><b>Для импортёра:</b> + приток инвестиций, технологии, рабочие места, налоги, рост; − зависимость, репатриация прибыли, вытеснение нацбизнеса, иностранный контроль над активами."},
+ {t:"analysis",q:"Какие функции подлежат жёсткой централизации, а какие — разумной децентрализации?",a:"<b>Централизуют</b> (стратегический уровень): финансовые потоки и инвестиции, стратегию и НИОКР/новые технологии, финансовый контроль дочерних компаний, единую учётную и кадровую политику, бренд.<br><b>Децентрализуют</b> (оперативный уровень): управление текущими производственными процессами (добыча/переработка), оперативный сбыт и логистику, кадры на местах.<br><b>Логика:</b> централизация — где важны единство и риск; децентрализация — где нужны скорость и знание местных условий."}
+]},
+{n:9,q:[
+ {t:"theory",q:"Экономические организации, входящие в систему ООН",a:"ЭКОСОС и региональные комиссии; специализированные учреждения: <b>МВФ</b>, Группа <b>Всемирного банка</b> (МБРР, МАР, МФК, МАГИ, МЦУИС), <b>ЮНКТАД</b>, ЮНИДО, ПРООН, ФАО, МОТ, ВОИС. (ВТО формально вне ООН, но тесно связана.) Цели: развитие, торговля, финансы, занятость, продовольствие."},
+ {t:"theory",q:"Развивающиеся страны и их роль. Классификация стран с развивающейся экономикой",a:"<b>Черты:</b> низкий/средний доход, аграрно-сырьевая структура, экономический дуализм, зависимость от внешних рынков.<br><b>Классификация:</b> новые индустриальные страны (НИС — Ю. Корея, Сингапур), нефтеэкспортёры (ОПЕК), страны со средним доходом, наименее развитые (НРС), бедные страны с высокой задолженностью.<br><b>Роль растёт:</b> Китай, Индия, БРИКС — центры роста мировой экономики."},
+ {t:"analysis",q:"Что эффективнее: выходить со своим товаром за рубеж или продавать товар зарубежной компании на внутреннем рынке?",a:"Зависит от целей и ресурсов.<ul><li><b>Выход за рубеж:</b> доступ к большим рынкам, валютная выручка, рост и масштаб; но выше риски, затраты на адаптацию, конкуренцию, логистику.</li><li><b>Дистрибуция импортного товара дома:</b> ниже риск и порог входа, быстрый доход; но зависимость от иностранного партнёра, ограниченный рост, нет собственного бренда за рубежом.</li><li><b>Вывод:</b> экспорт стратегически предпочтительнее для устойчивого роста и конкурентоспособности, но требует ресурсов и компетенций; для старта проще импортная дистрибуция.</li></ul>"}
+]},
+{n:10,q:[
+ {t:"theory",q:"Преимущества и недостатки привлечения прямых и портфельных иностранных инвестиций",a:"<b>ПИИ</b> (≥10%, контроль): + технологии, менеджмент, долгосрочность, устойчивость, рабочие места; − потеря контроля над активами, влияние иностранцев.<br><b>Портфельные</b> (&lt;10%, доход): + ликвидность, быстрый приток капитала, развитие фондового рынка; − спекулятивность, «горячие деньги», волатильность, стремительный отток в кризис."},
+ {t:"theory",q:"Международный валютный фонд: причины создания, функции, цели, роль",a:"<b>МВФ</b> создан в 1944 (Бреттон-Вудс), действует с 1947.<br><b>Цели:</b> стабильность мировой валютной системы, упорядочение валютных курсов, помощь при дефиците платёжного баланса.<br><b>Функции:</b> кредитование, надзор (surveillance) за политикой стран, техническая помощь, эмиссия СДР.<br>Капитал — взносы по квотам (определяют и голоса). Критика — жёсткие условия кредитов и доминирование развитых стран."},
+ {t:"analysis",q:"Какой способ проникновения на рынок эффективнее для обмена технологиями: экспорт, СП, лицензия или прямые капвложения?",a:"С точки зрения <b>трансфера технологий</b>:<ul><li><b>Прямой экспорт</b> — технологии не передаются, только товар.</li><li><b>Лицензирование</b> — передача прав, но риск утраты контроля и появления конкурента.</li><li><b>Совместное предприятие</b> — наиболее сбалансированный обмен: технологии + локальные знания партнёра, разделение рисков.</li><li><b>Прямые капвложения (свой завод)</b> — полный контроль над технологией, но она остаётся «внутри», максимум капитала и риска.</li></ul><b>Для обмена технологиями оптимальны СП и лицензирование</b> — именно они обеспечивают двусторонний трансфер."}
+]},
+{n:11,q:[
+ {t:"theory",q:"Международная торговля товарами: динамика, товарная и географическая структура",a:"<b>Динамика:</b> в долгосрочном периоде рост торговли опережает рост производства (до кризисных провалов).<br><b>Товарная структура:</b> растёт доля готовой продукции, машин, оборудования и высокотехнологичных товаров; доля сырья снижается, но волатильна по ценам.<br><b>Географическая:</b> доминирование развитых стран при быстром росте Азии; <b>Китай — крупнейший экспортёр товаров</b>."},
+ {t:"theory",q:"Формы и причины международного движения капитала",a:"<b>Формы:</b> по цели — предпринимательский (ПИИ, портфельные) и ссудный (кредиты, займы, депозиты, облигации); по сроку — кратко-/долгосрочный; по источнику — частный, государственный, международных организаций.<br><b>Причины:</b> разница в норме прибыли, относительный избыток/недостаток капитала, доступ к рынкам и ресурсам, обход торговых барьеров, диверсификация рисков, налоговая оптимизация."},
+ {t:"analysis",q:"Чем схожи и различны усилия по продвижению продукции у отечественных и зарубежных потребителей?",a:"<b>Схожее:</b> цель — повысить интерес и продажи; инструменты маркетинга (реклама, цена, качество, бренд, сервис); изучение потребностей.<br><b>Различия за рубежом:</b> учёт культурных и языковых особенностей, местных стандартов и законов, иной конкуренции и каналов сбыта, адаптация товара и упаковки, валютные и логистические факторы, выбор стратегии (стандартизация vs адаптация)."}
+]},
+{n:12,q:[
+ {t:"theory",q:"Глобализация мирового хозяйства: сущность, причины, последствия",a:"См. билеты 2 и 4: усиление взаимозависимости экономик и формирование единого мирового рынка. Причины — НТП, либерализация, ТНК, унификация институтов. Последствия — рост эффективности и диффузия технологий, но усиление неравенства и финансовой нестабильности."},
+ {t:"theory",q:"Свободные экономические зоны: определение, причины создания, значение",a:"<b>СЭЗ</b> — территория с особым (льготным) режимом: таможенным, налоговым, административным.<br><b>Виды:</b> зоны свободной торговли, промышленно-производственные, технико-внедренческие (технопарки), сервисные, оффшоры, комплексные.<br><b>Цели:</b> привлечение инвестиций и технологий, развитие экспорта, занятость, развитие отстающих регионов.<br><b>Примеры:</b> Шэньчжэнь (Китай), особые экономические зоны в России."},
+ {t:"analysis",q:"Существует ли уровень конкуренции, порождённый интеграцией? Его особенности и индикаторы",a:"Да — можно выделить <b>наднациональный (интеграционный) уровень</b> конкуренции, надстраивающийся над микро-, мезо- и макроуровнями.<ul><li>Субъекты — интеграционные блоки (ЕС, ЕАЭС) и их компании, конкурирующие за рынки, инвестиции, технологические стандарты.</li><li><b>Особенности:</b> единые правила внутри блока + общая внешняя защита; конкуренция «блок против блока».</li><li><b>Индикаторы:</b> доля блока в мировой торговле и ВВП, взаимная торговля внутри блока, приток ПИИ, общие технологические стандарты.</li></ul>"}
+]},
+{n:13,q:[
+ {t:"theory",q:"Понятие ТНК, типы ТНК, индекс транснационализации, роль в мировой экономике",a:"<b>ТНК</b> — компания с активами/производством в нескольких странах при головной компании в стране базирования.<br><b>Типы:</b> горизонтальные, вертикальные, диверсифицированные (конгломератные); по управлению — этно-, поли-, геоцентричные.<br><b>Индекс транснационализации (TNI, ЮНКТАД)</b> = среднее трёх долей: зарубежные активы/активы, зарубежные продажи/продажи, зарубежная занятость/занятость.<br><b>Роль:</b> на ТНК приходится бо́льшая часть мировой торговли, ПИИ и трансфера технологий."},
+ {t:"theory",q:"Протекционизм и либерализм в международной торговле",a:"<b>Протекционизм</b> — защита нацрынка барьерами. Аргументы: защита молодых отраслей, занятость, нацбезопасность, доходы бюджета.<br><b>Либерализм / фритредерство</b> — свобода торговли; рост эффективности через реализацию сравнительных преимуществ и специализацию.<br>На практике — сочетание: ВТО продвигает либерализацию, но растёт неопротекционизм (санкции, нетарифные барьеры)."},
+ {t:"analysis",q:"Если ВВП на душу не соответствует качеству деловой среды и микропоказателям — куда он изменится?",a:"<b>ВВП на душу</b> отражает достигнутый уровень, а деловая среда и микропоказатели — потенциал.<ul><li>Если деловая среда <b>лучше</b>, чем текущий ВВП на душу → потенциал не реализован, вероятен <b>рост</b> (страна «недооценена»).</li><li>Если ВВП на душу <b>выше</b>, чем позволяют институты и микроэкономика (например, держится на сырьевой ренте) → риск <b>снижения</b>.</li><li><b>Взаимосвязь:</b> качество институтов и фирм — фундамент устойчивого ВВП; разрыв со временем сокращается.</li></ul>"}
+]},
+{n:14,q:[
+ {t:"theory",q:"Этапы развития экономической интеграции в рамках ЕС",a:"1951 — ЕОУС; 1957 — Римский договор, ЕЭС (общий рынок); 1968 — таможенный союз; 1986 — Единый европейский акт → единый внутренний рынок с 1993; 1992 — Маастрихтский договор → ЕС, экономический и валютный союз; 1999/2002 — евро (безналичный/наличный); 2009 — Лиссабонский договор. ЕС прошёл все стадии интеграции по Балассе."},
+ {t:"theory",q:"Преимущества и недостатки для стран-реципиентов привлечения иностранных инвестиций",a:"<b>Плюсы:</b> приток капитала, технологии, менеджмент, рабочие места, налоги, рост экспорта, интеграция в глобальные цепочки.<br><b>Минусы:</b> вытеснение нацкомпаний, репатриация прибыли за рубеж, экологические и трудовые риски, зависимость, иностранный контроль над стратегическими отраслями, уязвимость к оттоку капитала."},
+ {t:"analysis",q:"Верно ли, что конкурентоспособность на природных ресурсах и цене не может быть устойчивой?",a:"<b>Да, в основном верно.</b><ul><li>Ценовое и сырьевое преимущество — <b>факторы низшего порядка</b> (по М. Портеру): легко копируются, зависят от конъюнктуры цен и курса, истощаются.</li><li>Сырьевая модель уязвима к «голландской болезни» и волатильности цен.</li><li><b>Устойчивая</b> конкурентоспособность строится на факторах высшего порядка: технологиях, инновациях, квалификации, брендах, уникальных компетенциях.</li><li>Вывод: сырьевое/ценовое преимущество — стартовое, но требует перехода к инновационному.</li></ul>"}
+]},
+{n:15,q:[
+ {t:"theory",q:"ЕАЭС: причины и цели создания, этапы интеграционного процесса",a:"<b>ЕАЭС</b> действует с 2015 (Договор 2014). Члены: Россия, Беларусь, Казахстан, Армения, Киргизия.<br><b>Цели:</b> свобода движения товаров, услуг, капитала и рабочей силы; единый рынок; согласованная экономическая политика.<br><b>Этапы:</b> ЗСТ СНГ → Таможенный союз (2010) → Единое экономическое пространство (2012) → ЕАЭС (2015)."},
+ {t:"theory",q:"Эволюция и современное состояние мировой валютной системы",a:"1) Парижская (1867) — золотой стандарт; 2) Генуэзская (1922) — золотодевизный; 3) Бреттон-Вудская (1944) — золотодолларовый стандарт, фиксированные курсы, МВФ; 4) Ямайская (1976/78) — плавающие курсы, демонетизация золота, СДР, многовалютность.<br><b>Сейчас:</b> доминирование доллара при росте роли евро и юаня, дискуссия о многополярной валютной системе и расчётах в нацвалютах."},
+ {t:"analysis",q:"Почему кластеры повышают конкурентоспособность международных компаний?",a:"<b>Кластер</b> (по М. Портеру) — географическая концентрация связанных компаний, поставщиков и институтов.<ul><li>эффект агломерации: общая инфраструктура, поставщики, кадры рядом → ниже издержки;</li><li>быстрый обмен знаниями и технологиями, рост инноваций;</li><li>здоровая внутренняя конкуренция + кооперация повышают эффективность;</li><li>доступ к специализированной рабочей силе и НИОКР;</li><li>результат — рост производительности и устойчивое конкурентное преимущество компаний кластера на мировом рынке.</li></ul>"}
+]},
+{n:16,q:[
+ {t:"theory",q:"Интеграционные процессы в рамках СНГ",a:"<b>СНГ</b> создано в 1991 для сохранения хозяйственных связей после распада СССР.<br>Ключевое — Соглашение о зоне свободной торговли (1994, обновлено 2011).<br>Углубление шло через ЕврАзЭС (2000) → Таможенный союз → ЕАЭС.<br><b>Проблемы:</b> разноскоростная и разноуровневая интеграция, различие интересов участников, конкуренция интеграционных проектов."},
+ {t:"theory",q:"Внешнеторговая политика: сущность и формы",a:"<b>Внешнеторговая политика</b> — целенаправленное воздействие государства на торговые отношения с другими странами.<br><b>Формы:</b> протекционизм (защита нацрынка) и свободная торговля (либерализация), а также умеренная и селективная политика.<br><b>Инструменты:</b> тарифные (пошлины) и нетарифные (квоты, лицензии, стандарты, субсидии, запреты)."},
+ {t:"analysis",q:"При каких условиях сделка может быть отнесена к числу внешнеторговых?",a:"Сделка считается <b>внешнеторговой</b>, если присутствуют признаки иностранного элемента:<ul><li>стороны находятся (имеют коммерческие предприятия) в разных государствах;</li><li>перемещение товара/услуги/капитала через таможенную границу;</li><li>расчёты, как правило, в иностранной валюте;</li><li>применимо право разных юрисдикций и нормы международного частного права/международных договоров.</li></ul>Главный критерий — нахождение коммерческих предприятий сторон в разных странах (Венская конвенция 1980)."}
+]},
+{n:17,q:[
+ {t:"theory",q:"Развивающиеся страны и их роль. Классификация развивающихся стран",a:"См. билет 9: большинство стран Азии, Африки и Лат. Америки; черты — низкий/средний доход, аграрно-сырьевая структура, дуализм, зависимость.<br><b>Классификация:</b> НИС, нефтеэкспортёры (ОПЕК), страны со средним доходом, наименее развитые (НРС), бедные страны с большой задолженностью. Растущая роль Китая, Индии, БРИКС."},
+ {t:"theory",q:"Методы стимулирования экспорта",a:"Прямое и косвенное субсидирование; экспортные кредиты и гарантии (в РФ — ЭКСАР/РЭЦ); налоговые льготы (возврат/нулевая ставка НДС); страхование экспортных рисков; информационная и дипломатическая поддержка; управление валютным курсом; экспортные зоны; в крайних случаях — демпинг. Экспортные субсидии в основном ограничены правилами ВТО."},
+ {t:"analysis",q:"При благоприятном инвестклимате какой вид инвестиций предпочтителен — приток или отток?",a:"<b>Зарубежные</b> инвестиции = вывоз капитала (отток), <b>иностранные</b> = ввоз (приток).<ul><li>При <b>благоприятном инвестклимате</b> страны предпочтителен <b>приток</b> (ввоз) ПИИ: капитал, технологии, рабочие места, рост.</li><li>Отток оправдан, когда нужны рынки сбыта, ресурсы за рубежом или доходность выше вне страны.</li><li>Оптимально — баланс: благоприятный климат притягивает капитал, а сильные нацкомпании одновременно инвестируют за рубеж (как развитые страны).</li></ul>"}
+]},
+{n:18,q:[
+ {t:"theory",q:"Характеристика субъектов мирового хозяйства",a:"<b>Субъекты:</b> 1) национальные государства; 2) ТНК и транснациональные банки (ТНБ); 3) международные экономические организации (МВФ, ВТО, Всемирный банк); 4) интеграционные объединения (ЕС, ЕАЭС); 5) региональные и местные органы власти; 6) физлица, домохозяйства, НПО. Ведущие — государства, ТНК и международные организации."},
+ {t:"theory",q:"Роль энергетических ресурсов в мировой экономике",a:"<b>ТЭР</b> (нефть, газ, уголь, уран, ВИЭ) — основа производства и фактор конкурентоспособности и геополитики. Запасы распределены крайне неравномерно (Ближний Восток, Россия). <b>ОПЕК/ОПЕК+</b> влияет на цены. Идёт энергопереход к ВИЭ. Энергобезопасность — приоритет; цены на энергоносители — ключевой фактор мировой конъюнктуры."},
+ {t:"analysis",q:"Как закрыть лазейки ухода ТНК от налогов через низконалоговые юрисдикции и трансфертные цены?",a:"<ul><li>контроль <b>трансфертного ценообразования</b> по принципу «вытянутой руки» (arm's length);</li><li>правила <b>КИК</b> (контролируемых иностранных компаний) и налогообложение нераспределённой прибыли;</li><li>международный обмен налоговой информацией (CRS), страновая отчётность ТНК (CbCR);</li><li>план ОЭСР <b>BEPS</b> и глобальный минимальный налог 15% (Pillar 2);</li><li>деофшоризация, ограничение вычета процентов и роялти в офшоры.</li></ul>"}
+]},
+{n:19,q:[
+ {t:"theory",q:"Международное разделение труда, его формы и основные тенденции развития",a:"<b>МРТ</b> — специализация стран на производстве определённых товаров/услуг с последующим обменом.<br><b>Формы:</b> общее (по сферам — пром./с.х./услуги), частное (по отраслям), единичное (подетальная, технологическая специализация внутри ТНК/GVC). Виды — международная специализация и кооперирование.<br><b>Тенденции:</b> углубление МРТ, рост внутриотраслевой торговли, фрагментация производства (глобальные цепочки стоимости), сервисизация."},
+ {t:"theory",q:"Инновационный потенциал современного мирового хозяйства",a:"<b>Инновационный потенциал</b> — способность создавать и внедрять инновации.<br><b>Показатели:</b> расходы на НИОКР (% ВВП), число патентов, доля высокотехнологичного экспорта, Глобальный инновационный индекс (GII).<br><b>Лидеры:</b> США, Китай, ЕС, Япония, Ю. Корея, Израиль, Швейцария. Инновации — главный фактор устойчивой конкурентоспособности и экономического роста."},
+ {t:"analysis",q:"В какие страны вкладывают российские компании и какие будут предпочтительны?",a:"<b>Исторически:</b> Кипр и иные офшоры/перевалочные юрисдикции, страны СНГ (Казахстан, Беларусь, Армения), ЕС, нефтегазовые активы за рубежом.<br><b>В условиях санкций тренд смещается к «дружественным» рынкам:</b> страны ЕАЭС и СНГ, Китай, Индия, Турция, ОАЭ/Ближний Восток, Юго-Восточная Азия, Африка, Латинская Америка.<br><b>Критерии выбора:</b> доступ к рынкам и ресурсам, политическая лояльность, расчёты в нацвалютах, отсутствие санкционных рисков."}
+]},
+{n:20,q:[
+ {t:"theory",q:"Современный мировой рынок и его структура",a:"<b>Мировой рынок</b> — сфера устойчивых товарно-денежных отношений между странами на основе МРТ.<br><b>Структура:</b> по объектам — рынки товаров, услуг, капиталов, рабочей силы, технологий, валют; по товарным группам; географическая; по типу конкуренции.<br><b>Признаки:</b> мировые цены, конкуренция, унифицированные правила (ВТО), множественность участников."},
+ {t:"theory",q:"Государственное регулирование внешней торговли",a:"<b>Цели:</b> защита нацпроизводителей, доходы бюджета, равновесие платёжного баланса, экономическая безопасность.<br><b>Методы:</b> тарифные (пошлины) и нетарифные (квоты, лицензии, стандарты, запреты, валютное регулирование), а также стимулирование экспорта.<br><b>Уровни:</b> национальный, наднациональный (ЕАЭС) и международный (ВТО)."},
+ {t:"analysis",q:"Будет ли транснационализация бизнеса в странах СНГ активнее с образованием Таможенного союза?",a:"<b>Да, скорее активнее.</b><ul><li>ТС/ЕАЭС снимает таможенные барьеры → свободное движение товаров, капитала, рабочей силы внутри союза.</li><li>Единый рынок повышает эффект масштаба и стимулирует создание компаний с активами в нескольких странах-членах.</li><li>Гармонизация норм снижает издержки трансграничного бизнеса.</li><li><b>Ограничения:</b> разный размер экономик, асимметрия интересов, конкуренция с уже сильными российскими ТНК.</li></ul>"}
+]},
+{n:21,q:[
+ {t:"theory",q:"Международное разделение труда: сущность и формы",a:"<b>МРТ</b> — специализация стран на выпуске определённой продукции для обмена. <b>Формы:</b> общее (по крупным сферам), частное (по отраслям и товарам), единичное (подетальная и технологическая специализация внутри ТНК). Базируется на абсолютных и сравнительных преимуществах; реализуется через международную специализацию и кооперирование производства."},
+ {t:"theory",q:"Этапы развития экономической интеграции в рамках СНГ",a:"1991 — создание СНГ; 1993 — Договор об Экономическом союзе; 1994/2011 — зона свободной торговли; 2000 — ЕврАзЭС; 2010 — Таможенный союз; 2012 — Единое экономическое пространство; 2015 — ЕАЭС. Интеграция шла разноскоростным «ядром» вокруг России, Беларуси и Казахстана."},
+ {t:"analysis",q:"В каком показателе выступает результат хоздеятельности (превышение результата над затратами) и в чём различие?",a:"Результат может выражаться:<ul><li><b>в абсолютном</b> виде — <b>прибыль</b> (выручка − затраты), измеряется в денежных единицах;</li><li><b>в относительном</b> виде — <b>рентабельность</b> (прибыль ÷ затраты или ÷ выручка/активы), измеряется в %.</li></ul><b>Различие:</b> прибыль показывает массу эффекта, но не его эффективность; рентабельность показывает отдачу на единицу затрат и позволяет сравнивать разные по масштабу проекты."}
+]},
+{n:22,q:[
+ {t:"theory",q:"Понятие и субъекты мировой экономики",a:"<b>Мировая экономика</b> — совокупность национальных хозяйств и негосударственных структур, связанных МРТ и системой МЭО в целостную систему.<br><b>Субъекты:</b> государства; ТНК и ТНБ; международные экономические организации (МВФ, ВТО, Всемирный банк); интеграционные объединения (ЕС, ЕАЭС); региональные органы; физлица, домохозяйства, НПО."},
+ {t:"theory",q:"Взаимодействие мировых и национальных рынков",a:"Национальные рынки связаны с мировым через внешнюю торговлю, движение капитала и труда.<ul><li>Мировой рынок формирует <b>мировые цены</b> и стандарты, влияет на нацэкономику через экспорт/импорт и конкуренцию.</li><li>Взаимодействие <b>двустороннее</b>: шоки мирового рынка (цены на нефть, кризисы) транслируются в нацэкономику и наоборот.</li><li>Степень вовлечённости измеряют экспортной и импортной квотой (экспорт или импорт ÷ ВВП), открытостью экономики.</li></ul>"},
+ {t:"calc",q:"Определите индекс условий торговли (ToT) страны X в 2025 г. по структуре экспорта/импорта и индексам цен. Что произошло с условиями торговли?",a:"<b>Формула:</b> ToT = (Σ долей·индексов цен экспорта ÷ Σ долей·индексов цен импорта) × 100.<br><b>Индекс цен экспорта:</b> 0,20·90 + 0,35·98 + 0,45·108 = 18 + 34,3 + 48,6 = <b>100,9</b>.<br><b>Индекс цен импорта:</b> 0,30·115 + 0,40·87 + 0,30·101 = 34,5 + 34,8 + 30,3 = <b>99,6</b>.<br><b>ToT = 100,9 ÷ 99,6 × 100 ≈ 101,3.</b><br><b>Вывод:</b> ToT &gt; 100 → условия торговли <b>улучшились на ≈ 1,3%</b>. Экспортные цены росли быстрее импортных, и за единицу экспорта страна может купить на ~1,3% больше импорта. (Открой вкладку «Калькуляторы», чтобы поиграть с данными.)"}
+]},
+{n:23,q:[
+ {t:"theory",q:"Основные этапы формирования и эволюции мировой экономики",a:"См. билет 1: 1) зарождение (XV–XVII вв., Великие геогр. открытия); 2) формирование (XVIII–XIX вв., промышленный переворот, колонии); 3) рубеж XIX–XX вв. — целостное мировое хозяйство; 4) 1914–1945 — кризис и дезинтеграция; 5) 1945–1970-е — Бреттон-Вудс, деколонизация, ТНК; 6) с 1980–90-х — глобализация и цифровизация."},
+ {t:"theory",q:"Классификация товаров на мировом рынке (торгуемые и неторгуемые)",a:"<b>Торгуемые товары (tradables)</b> — могут быть объектом международной торговли: промышленность, добыча, сельское хозяйство; их цены определяются мировым рынком.<br><b>Неторгуемые (non-tradables)</b> — потребляются там, где произведены: большинство услуг, строительство, ЖКХ, местный транспорт; цены — внутренним рынком.<br><b>Критерий</b> — участие в международном обмене. С этим связана модель Балассы–Самуэльсона и формирование реального валютного курса."},
+ {t:"calc",q:"IGGC: себестоимость 7225 руб/ед., цена 84 USD. При каком курсе USD/RUB деятельность безубыточна? Выгодно ли экспортёру повышение курса доллара?",a:"<b>Безубыточность:</b> выручка в рублях = себестоимость → Цена·Курс = Себестоимость.<br><b>Курс* = 7225 ÷ 84 ≈ 86,01 руб/долл.</b><ul><li>При курсе <b>выше 86,01</b> руб/долл — прибыль; при 86,01 — нулевая прибыль; ниже — убыток.</li><li><b>Да, повышение курса доллара (ослабление рубля) выгодно экспортёру:</b> валютная выручка конвертируется в большее число рублей, а рублёвые издержки фиксированы → растёт рублёвая прибыль.</li></ul>"}
+]},
+{n:24,q:[
+ {t:"theory",q:"Классификация стран в мировой экономике: принципы группировки, характеристики групп",a:"<b>Принципы:</b> по уровню дохода (Всемирный банк, ВНД на душу), по уровню развития (МВФ), по ИЧР (ООН).<br><b>Группы:</b> <i>развитые</i> (постиндустриальные, высокий доход и HDI, ОЭСР, G7); <i>развивающиеся</i> (аграрно-сырьевая структура, средний/низкий доход, включая НИС и нефтеэкспортёров); <i>страны с переходной экономикой</i>; <i>наименее развитые (НРС)</i>."},
+ {t:"theory",q:"Основные факторы, формирующие рыночную конъюнктуру",a:"<b>Конъюнктура</b> — текущее состояние рынка (соотношение спроса, предложения, цен).<br><b>Факторы:</b><ul><li><b>циклические</b> — фазы экономического цикла;</li><li><b>нециклические постоянные</b> — НТП, концентрация и монополизация, госрегулирование, инфляция;</li><li><b>временные/случайные</b> — сезонность, политические события, спекуляция, форс-мажор, погода.</li></ul><b>Показатели конъюнктуры:</b> объёмы производства и продаж, цены, запасы, портфель заказов."},
+ {t:"calc",q:"Nmetal: себестоимость 138680 руб/ед., цена 1500 USD. При каком курсе USD/RUB безубыточно? Выгодно ли сырьевым экспортёрам укрепление рубля?",a:"<b>Курс* = 138680 ÷ 1500 ≈ 92,45 руб/долл.</b><ul><li>При курсе <b>выше 92,45</b> руб/долл — прибыль; при 92,45 — безубыточность; ниже — убыток.</li><li><b>Нет, укрепление рубля сырьевым экспортёрам невыгодно:</b> крепкий рубль = меньше рублей за каждый доллар выручки при тех же рублёвых издержках → сжатие маржи. Экспортёрам выгодно <i>ослабление</i> рубля.</li></ul>"}
+]},
+{n:25,q:[
+ {t:"theory",q:"Международное разделение труда: процесс возникновения и современное состояние",a:"<b>МРТ</b> возникло из естественных различий (природа, климат, ресурсы), затем — из приобретённых преимуществ (технологии, капитал, труд). Теоретическая база: абсолютные (А. Смит) и сравнительные (Д. Рикардо) преимущества, теория Хекшера–Олина.<br><b>Современное состояние:</b> углубление специализации, рост внутриотраслевой торговли, фрагментация производства и глобальные цепочки стоимости (GVC), ведущая роль ТНК, сервисизация и цифровизация."},
+ {t:"theory",q:"Особенности ценообразования на мировых товарных рынках",a:"<b>Мировая цена</b> — цена крупных регулярных сделок в свободно конвертируемой валюте в основных центрах торговли.<br><b>Особенности:</b> множественность цен на один товар; сильное влияние мировой конъюнктуры; роль биржевых котировок, справочных и контрактных цен; влияние ТНК и ценовых лидеров (ОПЕК); трансфертные цены внутри ТНК; валютный фактор.<br><b>Виды цен:</b> справочные, биржевые, аукционные, контрактные, трансфертные."},
+ {t:"calc",q:"Импорт телефонов из Турции: закупка 20 EUR, доставка зависит от объёма, продажа 2200 руб, EUR/RUB=89,301. Минимальный объём импорта для прибыли 10%? Динамика прибыли при укреплении евро? Прогноз курса?",a:"<b>Себестоимость ед. = (20 + доставка)·89,301 руб; маржа = (2200 − себест.) ÷ себест.</b><br><table style='width:100%;border-collapse:collapse;font-size:13px'><tr><td>100 шт (дост. 5€)</td><td>себест. 2232,5 ₽</td><td><b>−1,5%</b> убыток</td></tr><tr><td>500 шт (4€)</td><td>2143,2 ₽</td><td>+2,7%</td></tr><tr><td>1000 шт (3€)</td><td>2053,9 ₽</td><td>+7,1%</td></tr><tr><td><b>10000 шт (2€)</b></td><td>1964,6 ₽</td><td><b>+12,0% ✓</b></td></tr><tr><td>20000 шт (1€)</td><td>1875,3 ₽</td><td>+17,3% ✓</td></tr></table><b>Ответ:</b> минимальный объём для прибыли ≥10% — <b>10 000 шт</b> (доставка падает до 2 €/шт, маржа ≈12%). При 1000 шт маржа лишь ~7% — недостаточно.<br><b>При укреплении евро</b> рублёвая себестоимость растёт (закупка в EUR), цена продажи фиксирована 2200 ₽ → <b>прибыль импортёра падает</b> (для импортёра крепкий евро невыгоден — зеркально экспортёру).<br><b>Прогноз курса</b> — открытый вопрос: оценивайте факторы (цены на нефть/газ, торговый баланс РФ, ставка ЦБ, санкции, геополитика, спрос на валюту), а не называйте одно число."}
+]}
+];
+
+/* ============ FLASHCARDS ============ */
+const CARDS=[
+ ["Формы МЭО (6 шт)","Торговля товарами и услугами; движение капитала; миграция рабочей силы; валютно-финансовые отношения; экономическая интеграция; обмен технологиями."],
+ ["Стадии интеграции по Балассе","1) Зона свободной торговли → 2) Таможенный союз → 3) Общий рынок → 4) Экономический и валютный союз → 5) Полная интеграция."],
+ ["Индекс условий торговли (ToT)","ToT = (индекс цен экспорта ÷ индекс цен импорта) × 100. >100 — улучшение, <100 — ухудшение."],
+ ["Безубыточный курс экспортёра","Курс* = Себестоимость(руб) ÷ Цена(валюта). Ослабление рубля выгодно экспортёру, укрепление — невыгодно."],
+ ["4 мировые валютные системы","Парижская (1867, золотой стандарт) → Генуэзская (1922) → Бреттон-Вудская (1944) → Ямайская (1976, плавающие курсы, СДР)."],
+ ["Индекс транснационализации (TNI)","Среднее трёх долей: зарубежные активы/активы, зарубежные продажи/продажи, зарубежная занятость/занятость."],
+ ["ПИИ vs портфельные","ПИИ — ≥10%, контроль, технологии, долгосрочные. Портфельные — <10%, ради дохода, ликвидные, «горячие деньги»."],
+ ["4 способа поставки услуг (ГАТС)","1) Трансграничная поставка; 2) потребление за рубежом; 3) коммерческое присутствие; 4) перемещение физлиц."],
+ ["Тарифные vs нетарифные методы","Тарифные — пошлины. Нетарифные — квоты, лицензии, стандарты, субсидии, запреты. Сегодня доминируют нетарифные."],
+ ["Субъекты мирового хозяйства","Государства; ТНК и ТНБ; международные организации (МВФ, ВТО, ВБ); интеграционные блоки (ЕС, ЕАЭС); регионы; домохозяйства и НПО."],
+ ["Торгуемые vs неторгуемые товары","Торгуемые — участвуют в межд. торговле (промышленность, сырьё). Неторгуемые — потребляются на месте (услуги, стройка, ЖКХ)."],
+ ["Формы МРТ","Общее (по сферам), частное (по отраслям), единичное (подетальная/технологическая специализация в ТНК)."],
+ ["Прибыль vs рентабельность","Прибыль — абсолютный показатель (руб). Рентабельность — относительный (%), отдача на единицу затрат."],
+ ["Группа Всемирного банка","МБРР, МАР, МФК, МАГИ, МЦУИС."],
+ ["BEPS / меры против ухода от налогов","Контроль трансфертных цен (arm's length), правила КИК, обмен инфо (CRS), CbCR, глобальный минимальный налог 15% (Pillar 2)."],
+ ["Факторы конъюнктуры","Циклические (фазы цикла); постоянные нециклические (НТП, монополизация, госрегулирование); временные (сезонность, политика, спекуляция)."],
+ ["Развитые страны: критерии","Высокий ВНД на душу, постиндустриальная структура, высокий HDI, зрелые институты, членство в ОЭСР."],
+ ["Виды цен на мировом рынке","Справочные, биржевые, аукционные, контрактные, трансфертные."],
+ ["ЕАЭС: участники и год","С 2015. Россия, Беларусь, Казахстан, Армения, Киргизия. Путь: ТС (2010) → ЕЭП (2012) → ЕАЭС (2015)."],
+ ["Цели МВФ","Стабильность валютной системы, упорядочение курсов, помощь при дефиците платёжного баланса. Создан в 1944 (Бреттон-Вудс)."]
+];
+
+/* ============ ACHIEVEMENTS ============ */
+const ACHS=[
+ {id:"first",ico:"🌱",t:"Первый шаг",d:"Раскрыть первый ответ"},
+ {id:"calc",ico:"🧮",t:"Гринспен",d:"Решить задачу в калькуляторе"},
+ {id:"cards10",ico:"🃏",t:"Картёжник",d:"Знаю 10 флэш-карт"},
+ {id:"half",ico:"⛰️",t:"Полпути на Эверест",d:"Раскрыть 50% всех ответов"},
+ {id:"allcalc",ico:"💰",t:"Министр финансов",d:"Прогнать все 4 типа задач"},
+ {id:"night",ico:"🦉",t:"Спящий гигант",d:"Заниматься после полуночи"},
+ {id:"summit",ico:"🏔️",t:"Властелин мировой экономики",d:"Раскрыть все ответы по билетам"}
+];
+
+/* ============ LEVELS ============ */
+const LEVELS=[
+ [0,"Экономический эмигрант"],[100,"Стажёр ВТО"],[300,"Младший аналитик"],[600,"Трейдер выходного дня"],
+ [1000,"Региональный эксперт"],[1600,"Мастер глобальных цепей"],[2400,"Валютный спекулянт"],
+ [3500,"Архитектор санкций"],[5000,"Глава центробанка"],[7500,"Министр финансов G7"],
+ [10000,"Лауреат Нобеля"],[15000,"Властелин мировой экономики"]
+];
+
+/* ============ STATE ============ */
+const KEY="everest_v1";
+let S=JSON.parse(localStorage.getItem(KEY)||"{}");
+S.xp=S.xp||0; S.revealed=S.revealed||{}; S.knownCards=S.knownCards||{}; S.calcsDone=S.calcsDone||{}; S.achs=S.achs||{};
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._);t._=setTimeout(()=>t.classList.remove('show'),2200)}
+function addXP(n,msg){S.xp+=n;save();renderHUD();const h=document.querySelector('.hud');if(h){h.classList.add('bump');setTimeout(()=>h.classList.remove('bump'),420)}if(msg)toast(msg+" +"+n+" XP")}
+function levelInfo(xp){let i=0;for(let k=0;k<LEVELS.length;k++){if(xp>=LEVELS[k][0])i=k}
+ const cur=LEVELS[i],next=LEVELS[i+1];return{lvl:i+1,rank:cur[1],cur:cur[0],next:next?next[0]:null}}
+function renderHUD(){const L=levelInfo(S.xp);
+ document.getElementById('hud-xp').textContent=S.xp;
+ document.getElementById('hud-lvl').textContent=L.lvl;
+ document.getElementById('hud-rank').textContent=L.rank;
+ const bar=document.getElementById('hud-bar');
+ if(L.next){const p=(S.xp-L.cur)/(L.next-L.cur)*100;bar.style.width=Math.min(100,p)+"%"}else bar.style.width="100%";
+}
+function unlock(id){if(!S.achs[id]){S.achs[id]=1;save();const a=ACHS.find(x=>x.id===id);toast("Достижение: "+a.t);renderAchs()}}
+function checkAchs(){
+ const totalQ=TICKETS.reduce((s,t)=>s+t.q.length,0);
+ const rev=Object.keys(S.revealed).length;
+ if(rev>=1)unlock("first");
+ if(rev>=totalQ/2)unlock("half");
+ if(rev>=totalQ)unlock("summit");
+ if(Object.keys(S.knownCards).length>=10)unlock("cards10");
+ if(Object.keys(S.calcsDone).length>=1)unlock("calc");
+ if(Object.keys(S.calcsDone).length>=3)unlock("allcalc");
+ const h=new Date().getHours(); if(h>=0&&h<5)unlock("night");
+}
+
+/* ============ RENDER TICKETS ============ */
+function tagFor(t){return t==="calc"?'<span class="tag calc">задача</span>':t==="analysis"?'<span class="tag ana">аналитика</span>':''}
+function renderTickets(filter){
+ const host=document.getElementById('ticketList');host.innerHTML="";
+ const f=(filter||"").toLowerCase().trim();
+ let shown=0;
+ TICKETS.forEach(tk=>{
+   const text=tk.q.map(x=>x.q+" "+x.a).join(" ").toLowerCase();
+   if(f && !(text.includes(f) || (""+tk.n).includes(f)))return;
+   const hasCalc=tk.q.some(x=>x.t==="calc"), hasAna=tk.q.some(x=>x.t==="analysis");
+   const el=document.createElement('div');el.className="tk";
+   el.style.animationDelay=(Math.min(shown,14)*0.035)+'s';shown++;
+   el.innerHTML=`<div class="head"><div class="no">Билет ${tk.n}</div>
+     <div class="topics">${tk.q[0].q}<br><span class="t3">${tk.q[1].q}</span></div>
+     ${hasCalc?tagFor("calc"):hasAna?tagFor("analysis"):''}
+     <div class="chev">▾</div></div>
+     <div class="body">${tk.q.map((x,i)=>`
+       <div class="qa ${S.revealed[tk.n+'-'+i]?'show':''} ${x.t==='calc'?'solbox':''}" data-k="${tk.n}-${i}">
+         <div class="q"><span class="num">${i+1}</span>${x.q} ${tagFor(x.t)}</div>
+         <div class="reveal" data-rev="${tk.n}-${i}">${S.revealed[tk.n+'-'+i]?'▾ скрыть ответ':'▸ показать ответ (+10 XP)'}</div>
+         <div class="ans">${x.a}</div>
+       </div>`).join('')}</div>`;
+   host.appendChild(el);
+ });
+ host.querySelectorAll('.head').forEach(h=>h.onclick=e=>{if(e.target.closest('.reveal'))return;h.parentElement.classList.toggle('open')});
+ host.querySelectorAll('[data-rev]').forEach(r=>r.onclick=e=>{
+   e.stopPropagation();const k=r.dataset.rev;const qa=r.closest('.qa');
+   qa.classList.toggle('show');
+   const open=qa.classList.contains('show');
+   if(open && !S.revealed[k]){S.revealed[k]=1;save();addXP(10,"Ответ раскрыт");checkAchs();}
+   r.textContent=open?'▾ скрыть ответ':'▸ показать ответ';
+ });
+}
+
+/* ============ CHEAT SHEET ============ */
+function renderCheat(filter){
+ const host=document.getElementById('cheatList');host.innerHTML="";
+ const seen=new Set();const items=[];
+ TICKETS.forEach(tk=>tk.q.forEach(x=>{if(x.t!=='calc'){const key=x.q.slice(0,40);if(!seen.has(key)){seen.add(key);items.push(x)}}}));
+ const f=(filter||"").toLowerCase().trim();
+ items.forEach(x=>{
+   if(f && !(x.q+" "+x.a).toLowerCase().includes(f))return;
+   const el=document.createElement('div');el.className="card";
+   el.innerHTML=`<div class="q" style="font-weight:700;margin-bottom:8px">${x.q} ${tagFor(x.t)}</div><div class="small" style="line-height:1.62;color:#1d2230">${x.a}</div>`;
+   host.appendChild(el);
+ });
+ if(!host.children.length)host.innerHTML='<div class="muted">Ничего не найдено.</div>';
+}
+
+/* ============ CALCULATORS ============ */
+const totExp=[["Древесина",20,90],["Сталь",35,98],["Пшеница",45,108]];
+const totImp=[["Нефть",30,115],["Автомобили",40,87],["Удобрения",30,101]];
+function buildTotRows(){
+ const e=document.getElementById('tot-exp'),i=document.getElementById('tot-imp');
+ e.innerHTML=totExp.map((r,k)=>`<tr><td>${r[0]}</td><td><input type=number value=${r[1]} data-tot="e${k}s"></td><td><input type=number value=${r[2]} data-tot="e${k}p"></td></tr>`).join('');
+ i.innerHTML=totImp.map((r,k)=>`<tr><td>${r[0]}</td><td><input type=number value=${r[1]} data-tot="i${k}s"></td><td><input type=number value=${r[2]} data-tot="i${k}p"></td></tr>`).join('');
+ document.querySelectorAll('[data-tot]').forEach(inp=>inp.oninput=calcTot);
+ calcTot();
+}
+function calcTot(){
+ const g=id=>+document.querySelector(`[data-tot="${id}"]`).value;
+ let Px=0,Pm=0,sx=0,sm=0;
+ totExp.forEach((r,k)=>{const s=g('e'+k+'s'),p=g('e'+k+'p');Px+=s/100*p;sx+=s});
+ totImp.forEach((r,k)=>{const s=g('i'+k+'s'),p=g('i'+k+'p');Pm+=s/100*p;sm+=s});
+ const tot=Px/Pm*100, d=(tot-100);
+ const verdict=tot>100?`<span class="verdict good">улучшились на ${d.toFixed(1)}%</span>`:tot<100?`<span class="verdict bad">ухудшились на ${(-d).toFixed(1)}%</span>`:`не изменились`;
+ document.getElementById('tot-res').innerHTML=
+  `Индекс цен экспорта Pₓ = <b>${Px.toFixed(2)}</b> (Σ долей ${sx}%) · Индекс цен импорта Pₘ = <b>${Pm.toFixed(2)}</b> (Σ долей ${sm}%)<br>
+   <b>ToT = Pₓ / Pₘ × 100 = ${tot.toFixed(2)}</b> → условия торговли ${verdict}.`;
+ markCalc('tot');
+}
+function calcBe(){
+ const cost=+document.getElementById('be-cost').value, price=+document.getElementById('be-price').value, cur=document.getElementById('be-cur').value||"вал.";
+ const e=cost/price;
+ document.getElementById('be-res').innerHTML=
+  `<b>Курс* = ${cost} ÷ ${price} = ${e.toFixed(2)} руб/${cur}.</b><br>
+   При курсе <span class="verdict good">выше ${e.toFixed(2)}</span> — прибыль; при ${e.toFixed(2)} — безубыточно; <span class="verdict bad">ниже</span> — убыток.<br>
+   <span class="muted small">Ослабление рубля (рост курса) выгодно экспортёру; укрепление — невыгодно.</span>`;
+ markCalc('be');
+}
+function bePreset(c,p,cur){document.getElementById('be-cost').value=c;document.getElementById('be-price').value=p;document.getElementById('be-cur').value=cur;calcBe();}
+const impTiers=[[100,5],[500,4],[1000,3],[10000,2],[20000,1]];
+function calcImp(){
+ const base=+document.getElementById('imp-base').value, sell=+document.getElementById('imp-sell').value, rate=+document.getElementById('imp-rate').value, goal=+document.getElementById('imp-goal').value;
+ let minV=null;
+ const rows=impTiers.map(([v,ship])=>{
+   const cost=(base+ship)*rate; const m=(sell-cost)/cost*100; const ok=m>=goal;
+   if(ok && minV===null)minV=v;
+   return `<tr><td>${v.toLocaleString('ru')}</td><td>${ship}</td><td>${cost.toFixed(1)}</td><td class="${ok?'verdict good':'verdict bad'}">${m.toFixed(1)}%</td><td>${ok?'✓':'—'}</td></tr>`;
+ }).join('');
+ document.getElementById('imp-rows').innerHTML=rows;
+ document.getElementById('imp-res').innerHTML= minV!==null?
+   `<b>Минимальный объём для маржи ≥ ${goal}% — ${minV.toLocaleString('ru')} шт.</b><br><span class="muted small">При укреплении евро рублёвая себестоимость растёт → прибыль импортёра падает.</span>`:
+   `<span class="verdict bad">Ни на одном объёме маржа не достигает ${goal}%.</span> Снизьте цель или измените параметры.`;
+ markCalc('imp');
+}
+function markCalc(id){if(!S.calcsDone[id]){S.calcsDone[id]=1;save();addXP(50,"Задача решена");checkAchs();}}
+
+/* ============ FLASHCARDS ============ */
+let order=[...CARDS.keys()], fcPos=0;
+function renderFC(){
+ const idx=order[fcPos];const c=CARDS[idx];
+ document.getElementById('fc-q').textContent=c[0];
+ document.getElementById('fc-a').innerHTML=c[1];
+ document.getElementById('fc').classList.remove('flip');
+ const known=Object.keys(S.knownCards).length;
+ document.getElementById('fc-counter').textContent=`Карта ${fcPos+1}/${CARDS.length} · знаю: ${known}/${CARDS.length}`;
+}
+function fcNext(){fcPos=(fcPos+1)%CARDS.length;renderFC()}
+document.getElementById('fc').onclick=()=>document.getElementById('fc').classList.toggle('flip');
+document.getElementById('fc-next').onclick=fcNext;
+document.getElementById('fc-again').onclick=()=>document.getElementById('fc').classList.remove('flip');
+document.getElementById('fc-know').onclick=()=>{const idx=order[fcPos];if(!S.knownCards[idx]){S.knownCards[idx]=1;save();addXP(20,"Карта выучена");checkAchs()}fcNext()};
+document.getElementById('fc-shuffle').onclick=()=>{order.sort(()=>Math.random()-.5);fcPos=0;renderFC();toast("Перемешано")};
+document.addEventListener('keydown',e=>{if(document.getElementById('view-cards').classList.contains('active')){if(e.code==='Space'){e.preventDefault();document.getElementById('fc').classList.toggle('flip')}if(e.code==='ArrowRight')fcNext()}});
+
+/* ============ PROGRESS ============ */
+function renderLadder(){
+ const host=document.getElementById('ladder');const L=levelInfo(S.xp);
+ host.innerHTML=LEVELS.map((lv,k)=>{
+   const reached=S.xp>=lv[0];const isCur=(k+1)===L.lvl;
+   return `<div class="ach ${reached?'':'locked'}" style="${isCur?'border-color:var(--blue);border-width:2px':''}">
+     <div class="ico">${reached?'✓':'•'}</div>
+     <div class="txt"><b>Ур. ${k+1} · ${lv[1]}</b><span>${lv[0]} XP</span></div></div>`;
+ }).join('');
+}
+function renderAchs(){
+ document.getElementById('achList').innerHTML=ACHS.map(a=>{
+   const u=S.achs[a.id];
+   return `<div class="ach ${u?'':'locked'}"><div class="ico">${a.ico}</div><div class="txt"><b>${a.t}</b><span>${a.d}</span></div></div>`;
+ }).join('');
+}
+
+/* ============ NAV ============ */
+function moveSeg(){const nav=document.querySelector('nav.tabs');const a=nav&&nav.querySelector('.tab.active');const ind=document.getElementById('segInd');
+ if(!a||!ind)return;ind.style.left=a.offsetLeft+'px';ind.style.top=a.offsetTop+'px';ind.style.width=a.offsetWidth+'px';ind.style.height=a.offsetHeight+'px';}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+ t.classList.add('active');document.getElementById('view-'+t.dataset.v).classList.add('active');
+ moveSeg();
+ if(t.dataset.v==='progress'){renderLadder();renderAchs()}
+});
+window.addEventListener('resize',moveSeg);
+document.querySelectorAll('.calc-tab').forEach(t=>t.onclick=()=>{
+ document.querySelectorAll('.calc-tab').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.calc-panel').forEach(x=>x.classList.remove('active'));
+ t.classList.add('active');document.getElementById('calc-'+t.dataset.c).classList.add('active');
+});
+document.getElementById('search').oninput=e=>renderTickets(e.target.value);
+document.getElementById('cheatSearch').oninput=e=>renderCheat(e.target.value);
+document.getElementById('expandAll').onclick=()=>document.querySelectorAll('.tk').forEach(t=>t.classList.add('open'));
+document.getElementById('collapseAll').onclick=()=>document.querySelectorAll('.tk').forEach(t=>t.classList.remove('open'));
+document.getElementById('resetBtn').onclick=()=>{if(confirm('Сбросить весь прогресс (XP, ачивки, отметки)?')){localStorage.removeItem(KEY);S={xp:0,revealed:{},knownCards:{},calcsDone:{},achs:{}};renderHUD();renderTickets();renderAchs();renderLadder();toast('Прогресс сброшен')}};
+['be-cost','be-price','be-cur'].forEach(id=>document.getElementById(id).oninput=calcBe);
+['imp-base','imp-sell','imp-rate','imp-goal'].forEach(id=>document.getElementById(id).oninput=calcImp);
+
+/* ============ INIT ============ */
+renderHUD();renderTickets();renderCheat();buildTotRows();calcBe();calcImp();renderFC();renderAchs();renderLadder();checkAchs();
+moveSeg();requestAnimationFrame(moveSeg);setTimeout(moveSeg,200);
+
+/* ===================== THEME ===================== */
+function applyTheme(){
+ const t=S.theme||'auto';
+ const dark = t==='dark' || (t==='auto' && matchMedia('(prefers-color-scheme:dark)').matches);
+ document.documentElement.setAttribute('data-theme', dark?'dark':'light');
+ document.documentElement.style.colorScheme = dark?'dark':'light';
+ const b=document.getElementById('themeBtn'); if(b) b.textContent = ({auto:'🌗',light:'☀️',dark:'🌙'})[t];
+}
+document.getElementById('themeBtn').onclick=()=>{
+ const order=['auto','light','dark']; S.theme=order[(order.indexOf(S.theme||'auto')+1)%3]; save();
+ document.documentElement.classList.add('theme-anim'); applyTheme();
+ setTimeout(()=>document.documentElement.classList.remove('theme-anim'),520);
+ toast('Тема: '+({auto:'авто',light:'светлая',dark:'тёмная'})[S.theme]);
+};
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>{if((S.theme||'auto')==='auto')applyTheme()});
+applyTheme();
+
+/* ===================== STREAK ===================== */
+(function(){const today=new Date().toDateString();
+ if(S.lastDay!==today){const y=new Date(Date.now()-864e5).toDateString();
+   S.streak=(S.lastDay===y?(S.streak||0)+1:1); S.lastDay=today; save();
+   if(S.streak>1) setTimeout(()=>toast('🔥 Серия: '+S.streak+' дн. подряд'),1100);}
+})();
+
+/* ===================== CONFETTI ===================== */
+function burst(big){const c=document.getElementById('confetti');if(!c)return;const N=big?100:38;
+ const cols=['#007aff','#34c759','#ff9f0a','#ff3b30','#5e5ce6','#ff2d55','#30d158'];
+ for(let i=0;i<N;i++){const d=document.createElement('div');d.className='cft';
+   d.style.left=Math.random()*100+'vw';d.style.background=cols[i%cols.length];
+   d.style.animationDuration=(2+Math.random()*1.8)+'s';d.style.animationDelay=(Math.random()*.35)+'s';
+   d.style.width=(6+Math.random()*6)+'px';d.style.height=(10+Math.random()*8)+'px';
+   c.appendChild(d);setTimeout(()=>d.remove(),4200);}
+}
+/* celebrate on achievements & level-ups (wrap existing fns) */
+const _unlock=unlock; unlock=function(id){const had=S.achs[id];_unlock(id);if(!had&&S.achs[id])burst(false);};
+const _addXP=addXP; addXP=function(n,msg){const before=levelInfo(S.xp).lvl;_addXP(n,msg);const after=levelInfo(S.xp).lvl;
+ if(after>before){burst(true);setTimeout(()=>toast('🎉 Новый уровень: '+levelInfo(S.xp).rank),350);}};
+
+/* ===================== AI CONSULTANT ===================== */
+const STOP=new Set('и в во не на я с со как а то все она так его но да ты к у же вы за бы по только ее мне было вот от меня о из ему при или их чем над под про эта этот эти что это для'.split(' '));
+function norm(s){return s.toLowerCase().replace(/<[^>]+>/g,' ').replace(/[^a-zа-яё0-9 ]/gi,' ').split(/\s+/).filter(w=>w.length>2&&!STOP.has(w))}
+const KB=[];
+TICKETS.forEach(t=>t.q.forEach(q=>KB.push({title:q.q,html:q.a,toks:new Set(norm(q.q+' '+q.a)),ttl:norm(q.q),tk:t.n})));
+CARDS.forEach(c=>KB.push({title:c[0],html:c[1],toks:new Set(norm(c[0]+' '+c[1])),ttl:norm(c[0])}));
+function kbSearch(query,k){const qt=norm(query);if(!qt.length)return[];
+ return KB.map(e=>{let s=0;qt.forEach(w=>{if(e.toks.has(w))s++;if(e.ttl.includes(w))s+=1.6});return{e,s}})
+   .filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,k||3).map(x=>x.e)}
+function calcIntent(q){const s=q.toLowerCase();
+ if(/услов\w*\s*торгов|terms of trade|\btot\b/.test(s))return{type:'tot'};
+ if(/безубыточ|какой\s*курс|курс.*себестоим|себестоим.*курс/.test(s))return{type:'be',nums:(q.match(/\d+[.,]?\d*/g)||[]).map(x=>+x.replace(',','.'))};
+ if(/импорт.*приб|приб.*импорт|минимальн\w*\s*об/.test(s))return{type:'imp'};
+ return null}
+const PERSONA={
+ neutral:{hi:'',out:''},
+ keynes:{hi:'С позиций макрорегулирования: ',out:'<span class="src">— и помните о роли совокупного спроса.</span>'},
+ friedman:{hi:'Рынок всё расставит по местам. Если коротко: ',out:'<span class="src">— и следите за денежной массой.</span>'},
+ coach:{hi:'Погнали, чемпион! 💪 ',out:'<span class="src">Ещё билет — и ты непобедим!</span>'}
+};
+let lastChips=[];
+function pushMsg(html,who){const sc=document.getElementById('chatScroll');const d=document.createElement('div');d.className='msg '+(who||'bot');d.innerHTML=html;sc.appendChild(d);sc.scrollTop=sc.scrollHeight;return d}
+function pushTyping(){const sc=document.getElementById('chatScroll');const d=document.createElement('div');d.className='msg bot typing';d.innerHTML='<i></i><i></i><i></i>';sc.appendChild(d);sc.scrollTop=sc.scrollHeight;return d}
+function answerOffline(q){
+ const ci=calcIntent(q);
+ if(ci){
+   if(ci.type==='tot')return 'Это задача на <b>индекс условий торговли</b>: ToT = (Σ доля·индекс цен экспорта ÷ Σ доля·индекс цен импорта) × 100. ToT &gt; 100 — условия улучшились. В билете 22 ответ ≈ <b>101,3</b> (улучшились на ~1,3%). Вкладка «Калькуляторы» посчитает с твоими числами.';
+   if(ci.type==='be'){let ex='';if(ci.nums.length>=2){const e=ci.nums[0]/ci.nums[1];ex=` Для твоих чисел: ${ci.nums[0]} ÷ ${ci.nums[1]} ≈ <b>${e.toFixed(2)}</b>.`;}
+     return '<b>Безубыточный курс</b> = Себестоимость(руб) ÷ Цена(валюта).'+ex+' Выше этого курса — прибыль; ослабление рубля выгодно экспортёру, укрепление — невыгодно.';}
+   if(ci.type==='imp')return 'Задача на <b>минимальный объём импорта</b>: себестоимость ед. = (цена+доставка, EUR)·курс; маржа = (цена продажи − себестоимость) ÷ себестоимость. В билете 25 ответ — <b>10 000 шт</b> (маржа ≈12%). Калькулятор посчитает для любых параметров.';
+ }
+ const hits=kbSearch(q,3);if(!hits.length)return null;
+ lastChips=hits.slice(1).map(h=>h.title);
+ const top=hits[0];
+ return `<b>${top.title}</b><br>${top.html}`+(top.tk?`<span class="src">📄 Билет ${top.tk}</span>`:'');
+}
+async function answerOnline(text){
+ const ctx=kbSearch(text,3).map(h=>'• '+h.title+': '+h.html.replace(/<[^>]+>/g,' ')).join('\n').slice(0,3500);
+ const p=document.getElementById('persona').value;
+ const sys='Ты — «Эконом-бот», помощник для подготовки к устному экзамену по дисциплине «Мировая экономика и МЭО» (Финансовый университет, бакалавриат). Отвечай по-русски, кратко, структурированно (списками), в стиле персоны: '+p+'. Опирайся на материалы курса:\n'+ctx;
+ const base=(S.api.base||'https://api.openai.com/v1').replace(/\/+$/,'');
+ const r=await fetch(base+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.api.key},
+   body:JSON.stringify({model:S.api.model||'gpt-4o-mini',temperature:.4,messages:[{role:'system',content:sys},{role:'user',content:text}]})});
+ if(!r.ok)throw 0;const j=await r.json();const c=j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;if(!c)throw 0;
+ return c.replace(/\n/g,'<br>');
+}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+async function chatSendFn(text){
+ text=(text||document.getElementById('chatInput').value).trim();if(!text)return;
+ document.getElementById('chatInput').value='';
+ pushMsg(text,'me');
+ const typing=pushTyping();
+ const persona=PERSONA[document.getElementById('persona').value]||PERSONA.neutral;
+ let ans=null;
+ if(S.api&&S.api.key){try{ans=await answerOnline(text);}catch(e){toast('ИИ недоступен — отвечаю офлайн');}}
+ if(!ans){const off=answerOffline(text);ans=off?(persona.hi+off+persona.out):'Не нашёл точного совпадения в материалах курса. Назови тему конкретнее: ТНК, ЕАЭС, валютная система, протекционизм, условия торговли…';}
+ await wait(420);typing.remove();pushMsg(ans,'bot');renderChips();
+}
+function renderChips(){const c=document.getElementById('chatChips');if(!c)return;
+ const base=['Что такое ТНК?','Этапы интеграции ЕАЭС','Объясни условия торговли','Виды валютных систем'];
+ const list=(lastChips&&lastChips.length?lastChips:base).slice(0,4);
+ c.innerHTML=list.map(t=>`<span class="chip-s">${t}</span>`).join('');
+ c.querySelectorAll('.chip-s').forEach(ch=>ch.onclick=()=>chatSendFn(ch.textContent));
+}
+document.getElementById('chatSend').onclick=()=>chatSendFn();
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')chatSendFn()});
+document.getElementById('apiBtn').onclick=()=>{const b=document.getElementById('apiBox');b.style.display=b.style.display==='none'?'block':'none'};
+document.getElementById('apiSave').onclick=()=>{S.api={key:document.getElementById('apiKey').value.trim(),model:document.getElementById('apiModel').value.trim(),base:document.getElementById('apiBase').value.trim()};save();
+ document.getElementById('apiState').textContent=S.api.key?'  Подключено ✓':'  Офлайн-режим';toast(S.api.key?'ИИ подключён':'Офлайн-режим');};
+if(S.api){document.getElementById('apiKey').value=S.api.key||'';document.getElementById('apiModel').value=S.api.model||'';document.getElementById('apiBase').value=S.api.base||'';document.getElementById('apiState').textContent=S.api.key?'  Подключено ✓':'';}
+document.querySelector('[data-v="consult"]').addEventListener('click',()=>{
+ if(!document.getElementById('chatScroll').children.length){
+   pushMsg('Привет! Я <b>Эконом-бот</b> 🤖<br>Спроси меня про любую тему или билет — отвечу по материалам курса. Можно выбрать собеседника сверху или подключить свой ИИ через ⚙︎.','bot');
+   renderChips();
+ }
+});
+
+/* ===================== EXAM MODE ===================== */
+let examTk=null,examTimer=null,examLeft=0;
+function pickExam(){examTk=TICKETS[Math.floor(Math.random()*TICKETS.length)];
+ document.getElementById('examTitle').textContent='Билет '+examTk.n;
+ document.getElementById('examBody').innerHTML=examTk.q.map((x,i)=>`<div class="qa" data-ex="${i}"><div class="q"><span class="num">${i+1}</span>${x.q} ${tagFor(x.t)}</div><div class="ans">${x.a}</div></div>`).join('');
+ startTimer(20*60);}
+function startTimer(sec){examLeft=sec;clearInterval(examTimer);tickTimer();examTimer=setInterval(tickTimer,1000);}
+function tickTimer(){const t=document.getElementById('examTimer');const m=Math.floor(examLeft/60),s=examLeft%60;
+ t.textContent=m+':'+(s<10?'0':'')+s;t.className='timer'+(examLeft<60?' danger':examLeft<300?' warn':'');
+ if(examLeft<=0){clearInterval(examTimer);revealExam();toast('⏰ Время вышло!');}examLeft--;}
+function revealExam(){document.querySelectorAll('#examBody .qa').forEach(q=>q.classList.add('show'));}
+function closeExam(){document.getElementById('examBk').classList.remove('show');clearInterval(examTimer);}
+document.getElementById('examFab').onclick=()=>{pickExam();document.getElementById('examBk').classList.add('show');};
+document.getElementById('examReveal').onclick=revealExam;
+document.getElementById('examNext').onclick=pickExam;
+document.getElementById('examDone').onclick=()=>{addXP(60,'Билет отработан');closeExam();};
+document.getElementById('examClose').onclick=closeExam;
+document.getElementById('examBk').addEventListener('click',e=>{if(e.target.id==='examBk')closeExam()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeExam()});
+</script>
+</body>
+</html>
